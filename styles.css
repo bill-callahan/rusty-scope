@@ -1,0 +1,90 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: #f0f0f0;
+    background: #000;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.project-name {
+    font-size: 2.5rem;
+    color: #ff6f61;
+    background: linear-gradient(135deg, #ff6f61, #ff9a8b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    color: #ff9a8b;
+    font-style: italic;
+}
+
+.documentation, .book, footer {
+    padding: 50px 0;
+}
+
+.documentation p, .book p {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+.documentation a, .book a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #ff6f61;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+}
+
+.documentation a:hover, .book a:hover {
+    color: #ff9a8b;
+}
+
+footer {
+    background: #111;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: #f0f0f0;
+    padding: 20px 0;
+}
+
+footer .social-media {
+    margin-top: 10px;
+}
+
+footer .social-media a {
+    margin: 0 10px;
+}
+
+footer .social-media img {
+    width: 24px;
+}
+
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
