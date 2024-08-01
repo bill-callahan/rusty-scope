@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>2.1.4 - Wifi - Rusty-scope documentation</title>
+        <title>Introduction - Rusty-scope Journal</title>
 
 
         <!-- Custom HTML head -->
@@ -90,7 +90,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><a href="Theory.html">Chapter 1 - Theory</a></li><li class="chapter-item expanded affix "><a href="Terminology.html">1.1 - Terminology</a></li><li class="chapter-item expanded affix "><a href="LocationTime.html">1.2 - Location & Time</a></li><li class="chapter-item expanded affix "><a href="TheoryOfOperation.html">1.3 - Theory of operation</a></li><li class="chapter-item expanded affix "><a href="Theory-typical.html">1.3.1 - Typical setup</a></li><li class="chapter-item expanded affix "><a href="Implementation.html">Chapter 2 - Implementation</a></li><li class="chapter-item expanded affix "><a href="ESP32.html">2.1 - Hardware - ESP32</a></li><li class="chapter-item expanded affix "><a href="Connections.html">2.1.1 - Connections</a></li><li class="chapter-item expanded affix "><a href="Configuration.html">2.1.2 - Configuration</a></li><li class="chapter-item expanded affix "><a href="SoftwareInstallation.html">2.1.3 - Software Installation</a></li><li class="chapter-item expanded affix "><a href="Wifi.html" class="active">2.1.4 - Wifi</a></li><li class="chapter-item expanded affix "><a href="GPS.html">2.1.5 - GPS</a></li><li class="chapter-item expanded affix "><a href="StepperMotor.html">2.1.6 - Stepper Motor</a></li><li class="chapter-item expanded affix "><a href="Time.html">2.1.7 - Time</a></li><li class="chapter-item expanded affix "><a href="Rust.html">2.2 - Software - Rust</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li><li class="chapter-item expanded affix "><a href="Theory.html">Chapter 1 - Theory</a></li><li class="chapter-item expanded affix "><a href="Terminology.html">1.1 - Terminology</a></li><li class="chapter-item expanded affix "><a href="LocationTime.html">1.2 - Location & Time</a></li><li class="chapter-item expanded affix "><a href="TheoryOfOperation.html">1.3 - Theory of operation</a></li><li class="chapter-item expanded affix "><a href="Theory-typical.html">1.3.1 - Typical setup</a></li><li class="chapter-item expanded affix "><a href="Implementation.html">Chapter 2 - Implementation</a></li><li class="chapter-item expanded affix "><a href="TODO.html">2.1 - TODO list</a></li><li class="chapter-item expanded affix "><a href="ESP32.html">2.2 - Hardware - ESP32</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -143,7 +143,7 @@
                         </button>
                     </div>
 
-                    <h1 class="menu-title">Rusty-scope documentation</h1>
+                    <h1 class="menu-title">Rusty-scope Journal</h1>
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
@@ -175,17 +175,37 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="214---wifi"><a class="header" href="#214---wifi">2.1.4 - Wifi</a></h1>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Well...</p>
+<p>Imagine combining the thrill of stargazing with the satisfaction of building something from scratch. That's exactly what I've set out to do.</p>
+<p>I've embarked on an exciting journey to master the Rust programming language through a hands-on, real-world project. My mission? To develop a telescope mount controller, step by step, as I grow my Rust skills. The heart of this project will be an ESP32-based 3D printer board, which will control the stepper motors responsible for positioning the mount.</p>
+<p><img src="images/rust-logo-blk.svg" alt="The Rust Logo" /></p>
+<p>But why take on such a challenge? Well, my recent exposure to Rust programming on ESP32s has ignited a passion to dive deeper into this powerful language. Simultaneously, I'm eager to explore the capabilities of the ESP32, particularly in the context of telescope mount control. As an aspiring amateur astronomer, I'm keen to elevate my stargazing game, but I'm not content with simply purchasing off-the-shelf solutions. Ultimately, I want pin-point stars in my astrophotography.</p>
+<p>Sure, I could buy a ready-made mount, load up on software, and start observing right away. But where's the fun in that? I'm after the thrill of understanding the intricacies, of building something with my own hands (and code). Plus, let's be honest - those high-end astronomy mounts come with price tags that might make the Chief Financial Officer of my household raise an eyebrow or two.</p>
+<p>At its core, an astronomy mount's job is to move along two axes to point at specific areas of the night sky. Sounds simple enough, right? So I thought to myself, "Why not build one?" After all, the basic premise doesn't seem too complex. How hard could it be?</p>
+<p>Join me on this adventure as I attempt to marry the worlds of Rust programming, ESP32 microcontrollers, and amateur astronomy. It's going to be a learning experience, a test of perseverance, and hopefully, a whole lot of fun. Let's see if we can reach for the stars - both literally and figuratively!</p>
+<p><img src="images/Goal.jpeg" alt="Goal" /></p>
+<blockquote>
+<blockquote>
+<p>💡<strong>TIP</strong> - I asked MetaAI to generate this image with this prompt "imagine a guy sitting in a lawn chair, drinking a beer, and a telescope beside him pointed upwards into the night sky, filled with galaxies".   I think it's a great visual of what I'm trying to accomplish. 👍</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>Note:</strong> This is a work in progress. I'm still working on the project, so expect some rough edges.  Also, I've created this book (using <a href="https://rust-lang.github.io/mdBook/index.html">mdbook</a>) as a way to capture my thoughts on solving some of these challenges along the way.  I will/may miss stuff that the <a href="https://doc.rust-lang.org/book/">Rust Book</a> may cover, so please feel free to check it out.  I've realized i'm jumping all over the place, so, i'd like to call out that perhaps the end result doesn't actually show how i got there.</p>
+</blockquote>
+<blockquote>
+<p>Further, this book is really just a reference for me, so I'm not going to spend a lot of time on it.  I'm going to try to keep it updated as I go along, but I'm not going to be a stickler for keeping it up to date in sync with the code.</p>
+</blockquote>
+<blockquote>
+<p>I am <strong>NOT</strong> a professional programmer!  I wanted to learn Rust, and I'm hoping that this project will help me do that.  Sure there are better ways to do something, but my mantra right now is "Git-R-Done".  I can work out later how to improve on this project.</p>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="SoftwareInstallation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
 
-                            <a rel="next prefetch" href="GPS.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="Theory.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +215,8 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="SoftwareInstallation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
 
-                    <a rel="next prefetch" href="GPS.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="Theory.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
