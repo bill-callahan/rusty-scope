@@ -2,7 +2,7 @@
 
 ## Github repository
 
-[x] Setup github repo - rusty-scope
+- [x] Setup github repo - rusty-scope
   - [x] configure github pages - <https://bill-callahan.github.io/rusty-scope/>
   - [x] create rudimentory landing page
   - [x] move journal into repo
