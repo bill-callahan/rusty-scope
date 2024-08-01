@@ -1,0 +1,25 @@
+[book]
+authors = ["Bill-Callahan"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Rusty-scope Journal"
+
+
+[rust]
+edition = "2021"
+
+[build]
+create-missing = true
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+mathjax-support = true
+
+[output.html.playground]
+editable = true
+
+[preprocessor]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
