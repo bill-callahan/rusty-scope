@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustyScope Telescope Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #1a2b3c;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        nav {
+            background-color: #2c3e50;
+            padding: 0.5rem;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 1rem;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #1a2b3c;
+            color: white;
+        }
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+            background: linear-gradient(135deg, #1a2b3c, #3a5a78);
+            color: white;
+            border-radius: 5px;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .feature {
+            flex-basis: 30%;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .feature {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>RustyScope Telescope</h1>
+        <p>Exploring the cosmos with open-source technology</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="home" class="hero">
+            <h2>Welcome to RustyScope</h2>
+            <p>Your gateway to the stars with our innovative telescope project</p>
+            <button style="padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer;">Learn More</button>
+        </section>
+        
+        <section id="about">
+            <h2>About RustyScope</h2>
+            <p>The RustyScope is an open-source telescope project designed for amateur astronomers and hobbyists. Our goal is to make astronomy accessible to everyone with affordable, customizable telescope solutions.</p>
+            <p>Built with a combination of modern technology and classic design principles, RustyScope offers exceptional performance without the premium price tag.</p>
+        </section>
+        
+        <section id="features">
+            <h2>Key Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>High-Quality Optics</h3>
+                    <p>Premium lenses and mirrors for crisp, clear views of celestial objects.</p>
+                </div>
+                <div class="feature">
+                    <h3>Modular Design</h3>
+                    <p>Customizable components to suit your specific astronomical interests.</p>
+                </div>
+                <div class="feature">
+                    <h3>Open-Source Software</h3>
+                    <p>Community-developed software for tracking and image processing.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="gallery">
+            <h2>Gallery</h2>
+            <p>Images captured with RustyScope telescopes will appear here.</p>
+            <!-- You can add actual images here later -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                <div style="width: 200px; height: 150px; background: #ddd; display: flex; justify-content: center; align-items: center;">Image 1</div>
+                <div style="width: 200px; height: 150px; background: #ddd; display: flex; justify-content: center; align-items: center;">Image 2</div>
+                <div style="width: 200px; height: 150px; background: #ddd; display: flex; justify-content: center; align-items: center;">Image 3</div>
+            </div>
+        </section>
+    </main>
+    
+    <footer id="contact">
+        <p>&copy; 2023 RustyScope Telescope Project</p>
+        <p>Contact us at: info@rustyscope.com</p>
+    </footer>
+</body>
+</html>

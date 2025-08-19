@@ -1,0 +1,66 @@
+[package]
+name = "rustyscopefw"
+version = "0.1.0"
+authors = ["Bill-Callahan <bill@callahansecurity.com>"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "rustyscopefw"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = []
+display = ["dep:mipidsi", "dep:embedded-graphics", "dep:tinybmp", "dep:profont"]
+
+experimental = ["esp-idf-svc/experimental"]
+
+[dependencies]
+log = { version = "0.4", features = ["max_level_trace", "release_max_level_info"] }
+pretty_env_logger = "0.5"
+esp-idf-svc = { version = "0.51", features = ["experimental", "critical-section"] }
+hifitime = "4.1.1"
+portable-atomic = { version = "1.11.1", features = ["float"] }
+polynomials = "0.2.4"
+anyhow = "1.0.98"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+embedded-hal = { version = "0.2.7", features = ["unproven"] }
+embedded-svc = { version = "0.28.1", default-features = false }
+
+mipidsi = { version = "0.9.0", optional = true }
+embedded-graphics = { version = "0.8.1", optional = true }
+display-interface = { version = "0.5.0", optional = true }
+profont = { version = "0.7.0", optional = true }
+heapless = { version = "0.8.0" }
+tinybmp = { version = "0.6.0", optional = true }
+
+
+# --- Optional Embassy Integration ---
+# esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+
+# If you enable embassy-time-driver, you MUST also add one of:
+
+# a) Standalone Embassy libs ( embassy-time, embassy-sync etc) with a foreign async runtime:
+# embassy-time = { version = "0.4.0", features = ["generic-queue-8"] } # NOTE: any generic-queue variant will work
+
+# b) With embassy-executor:
+# embassy-executor = { version = "0.7", features = ["executor-thread", "arch-std"] }
+
+# NOTE: if you use embassy-time with embassy-executor you don't need the generic-queue-8 feature
+
+# --- Temporary workaround for embassy-executor < 0.8 ---
+# esp-idf-svc = { version = "0.51", features = ["embassy-time-driver", "embassy-sync"] }
+# critical-section = { version = "1.1", features = ["std"], default-features = false }
+
+[build-dependencies]
+embuild = "0.33"
+dotenv = "0.15.0"

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustyScope - Focuser Setup</title>
+    <!-- Use the exact same CSS as msetup.html for a consistent look -->
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg-color: #ffffff;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 0 1em;
+        }
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1.5em;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #34495e;
+            padding: 0.5em;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            margin: 0 0.5em;
+            border-radius: 4px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        nav a.active, nav a:hover {
+            background-color: var(--primary-color);
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            padding: 2em;
+            margin-bottom: 2em;
+        }
+        .card h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 0.5em 1em;
+        }
+        .info-grid strong {
+            color: var(--secondary-color);
+        }
+        button {
+            padding: 0.8em 1.5em;
+            font-size: 1em;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #btn-factory-reset {
+            background-color: var(--error-color);
+        }
+        #btn-factory-reset:hover {
+            background-color: #c0392b;
+        }
+        #status-message {
+            margin-top: 1em;
+            padding: 1em;
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+        #status-message.success {
+            background-color: #eafaf1;
+            color: #28a745;
+            border: 1px solid #a3e9a4;
+        }
+        #status-message.error {
+            background-color: #fbeae5;
+            color: #d9534f;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Focuser Configuration</h1>
+        </header>
+
+        <nav>
+            <a href="/setup">Management</a>
+            <a href="/setup/v1/telescope/0/setup">Telescope</a>
+            <a href="/setup/v1/focuser/0/setup" class="active">Focuser</a>
+        </nav>
+
+        <div class="card">
+            <!-- The form action points to our new unified endpoint -->
+            <form id="focuser-form">
+                <h2>Focuser Mechanics (Z-Axis)</h2>
+                <div class="form-grid">
+                    <label for="motorz_spr">Motor Steps/Rev</label>
+                    <input type="number" id="motorz_spr" name="motorz_spr" required min="1">
+                    
+                    <label for="motorz_microsteps">Microstepping</label>
+                    <select id="motorz_microsteps" name="motorz_microsteps">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="4">4</option>
+                        <option value="8">8</option>
+                        <option value="16">16</option>
+                        <option value="32">32</option>
+                        <option value="64">64</option>
+                        <option value="128">128</option>
+                        <option value="256">256</option>
+                    </select>
+
+                    <label for="motorz_gratio">Gear Ratio</label>
+                    <input type="number" id="motorz_gratio" name="motorz_gratio" required min="0" step="0.001">
+                </div>
+                
+                <hr>
+
+                <h2>Focuser Behavior</h2>
+                <div class="form-grid">
+                    <label for="focuser_max_step">Max Step Position</label>
+                    <input type="number" id="focuser_max_step" name="focuser_max_step" required min="1">
+                    
+                    <label for="focuser_step_size">Step Size (microns)</label>
+                    <input type="number" id="focuser_step_size" name="focuser_step_size" required min="0" step="0.01">
+                    
+                    <label for="focuser_reversed">Reverse Direction</label>
+                    <input type="checkbox" id="focuser_reversed" name="focuser_reversed" class="form-checkbox">
+                </div>
+
+                <hr>
+                
+                <button type="submit">Save Focuser Settings</button>
+                <div id="status-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Helper function (same as before)
+        function showStatus(message, isError = false) { /* ... */ }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('focuser-form');
+            
+            // --- 1. Fetch current config and populate the form ---
+            fetch('/management/v1/config')
+                .then(response => response.json())
+                .then(data => {
+                    const config = data.Value;
+                    form.elements.motorz_spr.value = config.motorz_spr;
+                    form.elements.motorz_microsteps.value = config.motorz_microsteps;
+                    form.elements.motorz_gratio.value = config.motorz_gratio;
+                    form.elements.focuser_max_step.value = config.focuser_max_step;
+                    form.elements.focuser_step_size.value = config.focuser_step_size;
+                    form.elements.focuser_reversed.checked = config.focuser_reversed;
+                })
+                .catch(error => showStatus('Could not load current configuration.', true));
+
+            // --- 2. Handle form submission ---
+            form.addEventListener('submit', (event) => {
+                event.preventDefault(); // Stop the default browser form submission
+                
+                const formData = new FormData(form);
+                const jsonData = {
+                    motorz_spr: parseInt(formData.get('motorz_spr')),
+                    motorz_microsteps: parseInt(formData.get('motorz_microsteps')),
+                    motorz_gratio: parseFloat(formData.get('motorz_gratio')),
+                    focuser_max_step: parseInt(formData.get('focuser_max_step')),
+                    focuser_step_size: parseFloat(formData.get('focuser_step_size')),
+                    focuser_reversed: formData.get('focuser_reversed') === 'on', // HTML checkboxes send 'on'
+                };
+                
+                showStatus('Saving settings...');
+
+                // PUT the partial JSON config to the server
+                fetch('/management/v1/configure/focuser', { // Use a specific sub-path
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ErrorNumber === 0) {
+                        showStatus(data.message || 'Settings saved successfully!');
+                    } else {
+                        showStatus(`Error: ${data.ErrorMessage}`, true);
+                    }
+                })
+                .catch(error => showStatus('Failed to save settings. Check connection.', true));
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+/*
+ * This linker script fragment is used to force the linker to keep the
+ * .iram1.text section, which contains our IRAM-safe Rust ISRs.
+ * Without this, the linker's garbage collection might discard the section
+ * because it can't see a direct call from the main C code.
+ */
+// KEEP(*(.iram1.text .iram1.text.*))
+
+/*
+ * Aggressively place all code from the planner and its direct dependencies
+ * into IRAM to find the source of the "Cache disabled" panic.
+ */
+KEEP(*(*planner*.o)(.text .literal .text.*))
+KEEP(*(*i2s0*.o)(.text .literal .text.*))
+KEEP(*(*sr74hc595*.o)(.text .literal .text.*))

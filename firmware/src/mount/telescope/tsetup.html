@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telescope Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2em;
+            max-width: 600px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.3em;
+        }
+        label {
+            display: block;
+            margin-top: 1.2em;
+            font-weight: bold;
+        }
+        input[type="number"],
+        input[type="range"],
+        select {
+            width: 100%;
+            padding: 0.4em;
+            margin-top: 0.3em;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 2em;
+            padding: 0.7em 1.5em;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .footer {
+            margin-top: 3em;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>RustyScope Telescope Setup</h1>
+
+    <form action="/telescope/0/configure" method="POST">
+        <label for="steps_per_degree">Motor Steps Per Degree
+            <input type="number" id="steps_per_degree" name="steps_per_degree" value="512" min="1" step="1">
+        </label>
+
+        <label for="tracking_rate">Tracking Rate
+            <select id="tracking_rate" name="tracking_rate">
+                <option value="sidereal">Sidereal</option>
+                <option value="solar">Solar</option>
+                <option value="lunar">Lunar</option>
+                <option value="custom">Custom</option>
+            </select>
+        </label>
+
+        <label for="mount_type">Mount Type
+            <select id="mount_type" name="mount_type">
+                <option value="equatorial">Equatorial</option>
+                <option value="altaz">Alt-Azimuth</option>
+                <option value="dobsonian">Dobsonian</option>
+            </select>
+        </label>
+
+        <label>
+            Enable Limit Switches
+            <input type="checkbox" name="enable_limits">
+        </label>
+
+        <label>
+            Use GPS for Sync
+            <input type="checkbox" name="enable_gps" checked>
+        </label>
+
+        <button type="submit">Save Settings</button>
+    </form>
+
+    <div class="footer">
+        <p><a href="/telescope/0/status">View Status</a> | <a href="/">Back to Home</a></p>
+        <p>RustyScope - an ASCOM Alpaca Telescope Server on ESP32</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+[build]
+target = "xtensa-esp32-espidf"
+
+[target.xtensa-esp32-espidf]
+linker = "ldproxy"
+# runner = "espflash flash --monitor"
+runner = "espflash flash --flash-size 8mb --partition-table partitions_8m.csv --monitor"
+rustflags = [ "--cfg",  "espidf_time64"]
+
+[unstable]
+build-std = ["std", "panic_abort"]
+
+[env]
+MCU="esp32"
+# Note: this variable is not used by the pio builder (`cargo build --features pio`)
+ESP_IDF_VERSION = "v5.3.2"
+
+# This tells the ESP-IDF build system to include our custom linker script fragment.
+ESP_IDF_LDFRAGMENTS_FILE = "ld/sections.ld.in"

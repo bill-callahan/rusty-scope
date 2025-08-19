@@ -1,0 +1,75 @@
+# Rust often needs a bit of an extra main task stack size compared to C (the default is 3K)
+
+# For builds WITH the display feature, a large stack is needed for the UI.
+# Use this line when compiling with `--features display`.
+# CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+
+# For HEADLESS builds, the main task does very little and needs a small stack.
+# UNCOMMENT the line below and COMMENT OUT the line above for headless builds.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# Increase the stack size for Interrupt Service Routines.
+# The default can be too small for complex Rust ISRs.
+# We are giving it a generous 8KB.
+CONFIG_FREERTOS_ISR_STACK_SIZE=8192
+
+# Use this to set FreeRTOS kernel tick frequency to 1000 Hz (100 Hz by default).
+# This allows to use 1 ms granularity for thread sleeps (10 ms by default).
+CONFIG_FREERTOS_HZ=1000
+
+# Workaround for https://github.com/espressif/esp-idf/issues/7631
+#CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=n
+#CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=n
+
+CONFIG_LWIP_MAX_SOCKETS=16
+
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_TIMER_SUPPORTS_ISR_DISPATCH_METHOD=y
+CONFIG_ESP_TIMER_TASK_PRIO=23
+CONFIG_ESPTOOLPY_FLASHMODE_DIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_MAX_LFN=255
+CONFIG_SPIFFS_USE_MAGIC=y
+CONFIG_HTTPD_WS_SUPPORT=y
+#ESP_IDF_COMP_SPIFFS_ENABLED=y
+
+# Enable SPIFFS support
+CONFIG_SPIFFS_ENABLED=y
+
+# Set the SPIFFS partition label
+CONFIG_SPIFFS_PARTITION_LABEL="storage"
+
+# Enable VFS support
+CONFIG_VFS_ENABLED=y
+
+# Enable SPIFFS VFS support
+CONFIG_VFS_SUPPORT_SPIFFS=y
+
+# Enable logging for SPIFFS
+CONFIG_SPIFFS_DEBUG=y
+
+# ==========================================================
+# LOGGING CONFIGURATION (Definitive Version)
+# ==========================================================
+
+# --- 1. Compile-Time Gate: Set to VERBOSE (Trace) ---
+# We must set BOTH the boolean flag and the numeric value.
+# This ensures that all log levels are compiled into the firmware.
+#CONFIG_LOG_MAXIMUM_LEVEL_VERBOSE=y
+#CONFIG_LOG_MAXIMUM_LEVEL=5
+
+# --- 2. Runtime Filter: Set the default boot level to DEBUG ---
+# We must also set BOTH the boolean flag and the numeric value here.
+# This tells the logger to show all messages up to Debug level at startup.
+#CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+#CONFIG_LOG_DEFAULT_LEVEL=3
+
+# --- (Optional) Fine-grained control can still be used if desired ---
+# If you want to quiet the C drivers, you can use this. For now, let's
+# just get all debug messages working.
+# CONFIG_LOG_RUNTIME_FILTERING=y
+# CONFIG_LOG_LEVELS="deeprs*:D"
+
+# --- 3. Timestamp (Recommended) ---
+CONFIG_LOG_TIMESTAMP_SOURCE_SYSTEM=y

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustyScope - Management</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg-color: #ffffff;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 0 1em;
+        }
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1.5em;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #34495e;
+            padding: 0.5em;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            margin: 0 0.5em;
+            border-radius: 4px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        nav a.active, nav a:hover {
+            background-color: var(--primary-color);
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            padding: 2em;
+            margin-bottom: 2em;
+        }
+        .card h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 0.5em 1em;
+        }
+        .info-grid strong {
+            color: var(--secondary-color);
+        }
+        button {
+            padding: 0.8em 1.5em;
+            font-size: 1em;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #btn-factory-reset {
+            background-color: var(--error-color);
+        }
+        #btn-factory-reset:hover {
+            background-color: #c0392b;
+        }
+        #status-message {
+            margin-top: 1em;
+            padding: 1em;
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+        #status-message.success {
+            background-color: #eafaf1;
+            color: #28a745;
+            border: 1px solid #a3e9a4;
+        }
+        #status-message.error {
+            background-color: #fbeae5;
+            color: #d9534f;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>RustyScope Control Panel</h1>
+        </header>
+
+        <nav>
+            <a href="/setup" class="active">Management</a>
+            <a href="/setup/v1/telescope/0/setup">Telescope</a>
+            <a href="/setup/v1/focuser/0/setup">Focuser</a>
+        </nav>
+
+        <div class="card">
+            <section id="system-info">
+                <h2>System Information</h2>
+                <div class="info-grid">
+                    <strong>Firmware Version:</strong> <span id="info-firmware-version">Loading...</span>
+                    <strong>IP Address:</strong> <span id="info-ip-address">Loading...</span>
+                    <strong>MAC Address:</strong> <span id="info-mac-address">Loading...</span>
+                    <strong>Free Heap:</strong> <span id="info-free-heap">Loading...</span>
+                </div>
+            </section>
+            
+            <hr style="margin: 2em 0; border: 0; border-top: 1px solid var(--border-color);">
+
+            <section id="system-actions">
+                <h2>System Actions</h2>
+                <button id="btn-reboot">Reboot Device</button>
+                <button id="btn-factory-reset">Factory Reset</button>
+                <div id="status-message"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to display status messages to the user.
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            // Use CSS classes to style the message box for success or error.
+            statusDiv.className = isError ? 'error' : 'success';
+            statusDiv.style.display = 'block';
+            
+            // Automatically hide the message after 5 seconds for a cleaner UI.
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Main function that runs once the page's HTML content is fully loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Fetch and Populate Read-Only Status Data ---
+            fetch('/management/v1/status')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // data.Value is an array of [key, value] pairs from our ApiValue::KeyPairs.
+                    // We can convert it into a simple JavaScript object for easier access.
+                    // const status = Object.fromEntries(data.Value);
+
+                    // data.Value is ALREADY the object we need. No conversion is necessary.
+                    const status = data.Value;
+                    
+                    document.getElementById('info-firmware-version').textContent = status.firmware_version || 'N/A';
+                    document.getElementById('info-ip-address').textContent = status.ip_address || 'N/A';
+                    document.getElementById('info-mac-address').textContent = status.mac_address || 'N/A';
+                    document.getElementById('info-free-heap').textContent = `${status.free_heap_bytes || 0} bytes`;
+                })
+                .catch(error => {
+                    console.error('Error fetching system status:', error);
+                    const infoDiv = document.getElementById('system-info');
+                    infoDiv.innerHTML = '<p style="color: red;">Could not load live system status. Check browser console for details.</p>';
+                });
+
+            // --- Event Listeners for Buttons ---
+            
+            // Find the reboot button by its ID.
+            const rebootButton = document.getElementById('btn-reboot');
+            // Attach a 'click' event handler.
+            rebootButton.addEventListener('click', () => {
+                // Show a confirmation dialog to prevent accidental reboots.
+                if (confirm('Are you sure you want to reboot the device? This will disconnect all clients.')) {
+                    // Send the PUT request to our reboot endpoint.
+                    fetch('/management/v1/reboot', { method: 'PUT' })
+                        .then(response => {
+                            if (response.ok) {
+                                // On success, inform the user.
+                                showStatus('Reboot command accepted. The device will restart shortly.');
+                            } else {
+                                // On failure, show an error.
+                                showStatus('Reboot command failed. Check device logs.', true);
+                            }
+                        })
+                        .catch(error => showStatus(`Error: ${error}`, true));
+                }
+            });
+            
+            // Find the factory reset button by its ID.
+            const resetButton = document.getElementById('btn-factory-reset');
+            // Attach a 'click' event handler.
+            resetButton.addEventListener('click', () => {
+                // Use a prompt for extra safety for a destructive action.
+                if (prompt("This is a destructive action that will erase all settings. The device will restart with factory defaults. Type 'RESET' to confirm.") === 'RESET') {
+                    // Send the PUT request to our factory reset endpoint.
+                    fetch('/management/v1/factoryreset', { method: 'PUT' })
+                         .then(response => {
+                            if (response.ok) {
+                                showStatus('Factory reset accepted. The device will erase settings and restart.');
+                            } else {
+                                showStatus('Factory reset command failed. Check device logs.', true);
+                            }
+                        })
+                        .catch(error => showStatus(`Error: ${error}`, true));
+                }
+            });
+        });
+    </script>
+</body>
+</html>
