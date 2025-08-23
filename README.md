@@ -25,7 +25,7 @@ RustyScope is packed with features typically found only in high-end commercial m
 *   **"Headless" Operation:** The controller is designed to run in a lean, headless mode for maximum reliability. An optional display feature can be enabled for local status monitoring.
 *   **Advanced Pointing Model:** The software correctly handles hemisphere-agnostic pole crossing ("pole flips"), ensuring full sky coverage.
 *   **Persistent Configuration:** All mount settings are saved to the internal flash filesystem, preserving your calibration across reboots.
-*   **Truly Open Source:** Licensed under the **GPLv3**, ensuring that the project and any derivatives will always remain free and open for the community to use, modify, and improve.
+*   **Truly Open Source:** Licensed under the **MIT**, ensuring that the project and any derivatives will always remain free and open for the community to use, modify, and improve.
 
 ---
 
