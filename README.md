@@ -25,7 +25,7 @@ RustyScope is packed with features typically found only in high-end commercial m
 *   **"Headless" Operation:** The controller is designed to run in a lean, headless mode for maximum reliability. An optional display feature can be enabled for local status monitoring.
 *   **Advanced Pointing Model:** The software correctly handles hemisphere-agnostic pole crossing ("pole flips"), ensuring full sky coverage.
 *   **Persistent Configuration:** All mount settings are saved to the internal flash filesystem, preserving your calibration across reboots.
-*   **Truly Open Source:** Licensed under the **GPLv3**, ensuring that the project and any derivatives will always remain free and open for the community to use, modify, and improve.
+*   **Truly Open Source:** Licensed under the **MIT**, ensuring that the project and any derivatives will always remain free and open for the community to use, modify, and improve.
 
 ---
 
@@ -33,12 +33,15 @@ RustyScope is packed with features typically found only in high-end commercial m
 
 This project is designed around the affordable and powerful **Makerbase MKS DLC32** controller board, which provides an excellent all-in-one platform with integrated stepper drivers, power management, and I/O.
 
+<https://www.aliexpress.com/item/1005003183498253.html?spm=a2g0o.store_pc_home.productList_8356958.pic_0>
+
 A complete bill of materials and wiring guide can be found in the [**Hardware Guide**] section of the documentation.
 
 *   **Microcontroller:** ESP32 (Dual Core)
 *   **Motion Control:** 74HC595 Shift Register with standard Step/Dir motor drivers
 *   **Timing & Location:** u-blox NEO-7M GPS Module with PPS
 *   **Storage:** Onboard SPIFFS and external SD Card support
+*   **Display** An optional TFT screen for a dashboard (optional - recommnded not to use)
 
 ---
 
