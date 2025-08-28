@@ -1,6 +1,6 @@
 # Core Design Principles
 
-The RustyScope firmware is built upon a set of core software design principles. Understanding these principles is key to understanding the "why" behind the structure of the code. They are designed to promote safety, maintainability, and real-time performance on a resource-constrained embedded system.
+The RustyScope firmware is built upon a set of core software design principles. Understanding these principles is key to understanding the "why" behind the structure of the code. They are designed to promote safety, maintainability, and real-time performance on a resource-constrained embedded system. This document provides an overview of these principles and explains how they were applied to the RustyScope project.
 
 ### 1. The Actor Model for Command Processing
 

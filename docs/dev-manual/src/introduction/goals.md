@@ -1,8 +1,8 @@
 # Project Goals
 
-This document outlines the primary technical and philosophical goals of the RustyScope project from a developer's perspective.
+This document outlines the primary technical and philosophical goals of the RustyScope project from a developer's perspective. It provides a high-level overview of the project's objectives and the key technical challenges that were addressed to achieve them.
 
-### 1. Create a Reference Architecture for Embedded Rust
+## 1. Create a Reference Architecture for Embedded Rust
 
 The foremost goal is to serve as a high-quality, real-world example of a complex embedded systems project built in Rust. This involves demonstrating solutions to common embedded challenges:
 *   **Concurrency:** Safely manage multiple independent tasks (network server, motor control, sensor polling) using Rust's ownership model and concurrency primitives like `Arc`, `Mutex`, and FreeRTOS message queues.

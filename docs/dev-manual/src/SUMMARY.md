@@ -28,7 +28,7 @@
     - [Persistence: The Storage Layer](./io-services/storage.md)
         - *This is your `storage.md` file.*
     - [The Display Controller and UI](./io-services/display.md)
-        - *This can be a new document based on the `ts35` module.*
+        - *This is your `display.md` file.*
 
 - **Chapter 5: The Alpaca API Layer**
     - [Implementing the Alpaca Standard](./api/AlpacaAPI.md)

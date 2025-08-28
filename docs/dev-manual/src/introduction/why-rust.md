@@ -1,6 +1,6 @@
 # Why Rust on ESP32?
 
-The choice of Rust as the programming language and the ESP32 as the hardware platform was a deliberate one, central to achieving the project's goals of safety, performance, and modern connectivity. This combination provides a powerful foundation for building a complex, real-time embedded system like RustyScope.
+The choice of Rust as the programming language and the ESP32 as the hardware platform was a deliberate one, central to achieving the project's goals of safety, performance, and modern connectivity. This combination provides a powerful foundation for building a complex, real-time embedded system like RustyScope. This document explains the reasons for choosing Rust and the ESP32 platform and discusses the benefits of this combination for the RustyScope project.
 
 ## The Case for Rust in Embedded Systems
 

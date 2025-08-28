@@ -15,7 +15,7 @@ pub fn handle_focuser_get(scope: Arc<RustyScope<'static>>, endpoint: &str) -> Ap
         let planner = unsafe { &*scope.system.planner.0 };
         (
             planner.current_position_steps()[2],
-            planner.is_busy()
+            planner.is_focuser_moving()
         )
     };
     let mut data = scope.app_state.lock().unwrap();

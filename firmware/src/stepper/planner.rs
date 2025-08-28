@@ -447,6 +447,15 @@ impl<'d> MotionPlanner<'d> {
     pub fn is_tracking(&self) -> bool { self.mode == PlannerMode::Tracking }
     pub fn is_guiding(&self) -> bool { self.mode == PlannerMode::Guiding }
     pub fn is_busy(&self) -> bool { self.mode != PlannerMode::Idle }
+    pub fn is_focuser_moving(&self) -> bool {
+        match self.mode {
+            PlannerMode::Moving => {
+                self.move_data.delta[2] != 0
+            }
+            _ => false,
+            }
+        }
+    
 
     pub fn sync_to_position(&mut self, new_logical_position: [i32; 3]) {
         self.sync_steps[0] = self.current_pos[0] - new_logical_position[0];
