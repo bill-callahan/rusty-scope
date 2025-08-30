@@ -152,7 +152,7 @@ impl<'d> SystemServices<'d> {
         //    It needs to be mutable because we will assign to it later.
         let mut webserver = None;
     
-    /*
+    /*  DISABLED FOR NOW - 
         // 2. The `if let` block now assigns to the outer `server` variable.
         if let Some(_sdcard_guard) = &mounted_fatfs_opt {
             // info!("[SystemServices] SD Card found, starting web server...");

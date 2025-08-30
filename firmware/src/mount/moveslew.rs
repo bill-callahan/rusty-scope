@@ -42,10 +42,7 @@ impl<'a> RustyScope<'a> {
         info!("Current focuser position: {}. Moving by {} steps.", current_position, delta_steps);
     
         // 3. Command the planner to move by the calculated RELATIVE delta.
-       // if let Err(e) = planner.move_steps([0, 0, delta_steps]) {
-       //     error!("Failed to move focuser: {}", e);
-       //     return Err(anyhow::anyhow!(e));
-       // }
+       
         // --- Command the Planner (Single Critical Section) ---
     {
         let _cs = CriticalSection::new();
@@ -77,68 +74,7 @@ impl<'a> RustyScope<'a> {
         Ok(())
     }
 
-    /*
-    pub fn execute_slew_to_target(&self) -> Result<()> {
-        info!("Executing slew to target...");
-
-    // --- 1. Get Target, Time, and Planner State in ONE SCOPE ---
-    let (target_ra, target_dec, sync_offset) = {
-        // We need to get the sync_offset from the planner at the same time
-        // we get the target coordinates to avoid race conditions.
-        let app_state = self.app_state.lock().unwrap();
-        //let planner = self.system.planner.lock().unwrap();
-        let _cs = CriticalSection::new();
-        let planner = unsafe { &mut *self.system.planner.0 };
-        (
-            app_state.target_ra,
-            app_state.target_dec,
-            planner.sync_steps() // This is your sync_offset from sync_to_position
-        )
-    }; // Locks are released here.
     
-    let current_lst = self.system.time.get_lst();
-
-    // --- 2. Calculate the LOGICAL Absolute Motor Step Position ---
-    // This is the position the mount *would* be at if it were perfectly calibrated
-    // with no sync offset.
-    let logical_ra_steps = target_ra.as_motor_steps(current_lst, &self.ra_drivetrain);
-    let logical_dec_steps = target_dec.as_motor_steps(&self.dec_drivetrain);
-
-    // --- 3. Apply the Sync Offset to get the PHYSICAL Target ---
-    // The planner only understands raw physical steps. We must adjust our logical
-    // target by the same offset that the telemetry uses.
-    // physical_target = logical_target + sync_offset
-    let physical_target_ra = logical_ra_steps + sync_offset[0];
-    let physical_target_dec = logical_dec_steps + sync_offset[1];
-
-    let target_position = [physical_target_ra, physical_target_dec, 0];
-
-    info!("Slew Calculation:");
-    info!("  -> Target RA/Dec: {} / {}", target_ra.as_hms_string(), target_dec.as_dms_string());
-    info!("  -> Logical Steps: [{}, {}]", logical_ra_steps, logical_dec_steps);
-    info!("  -> Sync Offset:   {:?}", sync_offset);
-    info!("  -> Final Physical Target Steps: {:?}", target_position);
-
-    // --- 4. Command the Planner ---
-    //if let Ok(mut planner) = self.system.planner.lock() {
-    //    if let Err(e) = planner.move_to_steps(target_position) {
-    //        error!("Failed to start slew: {}", e);
-    //        return Err(anyhow::anyhow!(e));
-    //    }
-    //}
-    // --- Command the Planner (Single Critical Section) ---
-    {
-        let _cs = CriticalSection::new();
-        let planner = unsafe { &mut *self.system.planner.0 };
-        if let Err(e) = planner.move_to_steps(target_position) {
-            return Err(anyhow::anyhow!(e));
-        }
-    }
-    
-    Ok(())
-    }
-
-    */
     pub fn execute_slew_to_target(&self) -> Result<()> {
     info!("Executing 4-quadrant intelligent slew to target...");
 

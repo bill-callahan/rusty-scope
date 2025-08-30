@@ -46,7 +46,7 @@ impl AxisDrivetrain {
     // A specific method for RA tracking rate
     pub fn get_sidereal_tracking_rate_sps(&self) -> f64 {
         //const SIDEREAL_HOURS_PER_DAY: f64 = 23.9344699;
-        const SIDEREAL_SECONDS_IN_MEAN_DAY: f64 = 86164.0905;
+        //const SIDEREAL_SECONDS_IN_MEAN_DAY: f64 = 86164.0905;
         let steps_per_rev_final_axis = self.steps_per_rev_motor * self.microstepping as f64 * self.total_gear_ratio;
         let steps_per_sidereal_day = steps_per_rev_final_axis;
         let result = steps_per_sidereal_day / 86400.0;

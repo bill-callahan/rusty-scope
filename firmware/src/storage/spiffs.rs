@@ -7,8 +7,10 @@ use std::ffi::CString;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 
-/// A manager for the SPIFFS filesystem that ensures it is unmounted when dropped.
-/// This is a true RAII (Resource Acquisition Is Initialization) guard.
+/// Represents a SPIFFS filesystem manager that ensures proper mounting and unmounting.
+/// This struct handles the lifecycle of the SPIFFS filesystem, including mounting, formatting,
+/// and unmounting operations. It implements RAII (Resource Acquisition Is Initialization)
+/// to ensure the filesystem is properly unmounted when the struct is dropped.
 pub struct SpiffsManager {
     partition_label: CString,
 }
@@ -40,7 +42,7 @@ impl SpiffsManager {
             return Err(EspError::from(ret).unwrap());
         }
 
-        // Get and log partition info, as you brilliantly added.
+        // Get and log partition info
         let mut total_bytes: usize = 0;
         let mut used_bytes: usize = 0;
         unsafe {

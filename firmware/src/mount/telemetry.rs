@@ -12,7 +12,7 @@ use crate::mount::{app_state::PierSide, commands::Command, Altitude, Azimuth, De
 
 
 impl<'a> RustyScope<'a> {
-    /// Updates the telemty
+    /// Updates the telemetry
     pub fn update_telemetry(&self) -> Result<()> {
         info!("Commanded to update telemetry...");
         let cmd = Command::UpdateTelemetry;

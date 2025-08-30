@@ -3,4 +3,4 @@
 /target
 /Cargo.lock
 .env
-GEMINI.md
+.gitignore
