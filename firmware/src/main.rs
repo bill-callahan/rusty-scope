@@ -4,7 +4,7 @@ mod gps;
 mod stepper;
 mod storage;
 mod time;
-mod webserver;
+//mod webserver;
 mod wifi;
 mod systemsvcs;
 
