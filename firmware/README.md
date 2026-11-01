@@ -13,8 +13,8 @@ This is a firmware for the ESP32 microcontroller written in Rust.
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/esp32-firmware.git
-cd esp32-firmware
+git clone https://github.com/bill-callahan/rusty-scope.git
+cd rusty-scope/firmware
 ```
 
 ### Configuration
@@ -22,14 +22,15 @@ cd esp32-firmware
 1. Copy the example configuration file:
 
 ```bash
-cp config.example.toml config.toml
+cp .env_example .env
 ```
 
 2. Edit the configuration file with your settings:
 
 ```bash
-nano config.toml
+vi .env
 ```
+..or just use your favorite editor.
 
 Adjust WiFi credentials, MQTT settings, and other parameters as needed.
 
@@ -38,7 +39,11 @@ Adjust WiFi credentials, MQTT settings, and other parameters as needed.
 1. Set up the Rust toolchain for ESP32:
 
 ```bash
-rustup target add xtensa-esp32-espidf
+espup install --toolchain=1.93.0.0
+```
+and make sure you source your export-esh.sh script before building.  This is Muey Importante!!
+```bash
+. ~/export-esp.sh
 ```
 
 2. Build the firmware:
@@ -52,20 +57,16 @@ cargo build --release
 Connect your ESP32 device to your computer via USB, then:
 
 ```bash
-cargo espflash flash --release
+cargo run --release
 ```
 
-To monitor the serial output after flashing:
 
-```bash
-cargo espflash monitor
-```
 
 ## Troubleshooting
 
 If you encounter issues with the build or flash process:
 
-- Make sure your ESP-IDF is properly installed and configured
+- Make sure your ESP-IDF is properly installed and configured (currently, 1.93.0.0 works)
 - Check if your ESP32 is properly connected
 - Verify that you have the correct permissions to access the serial port
 
