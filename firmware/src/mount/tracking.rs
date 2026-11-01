@@ -1,7 +1,7 @@
-/// /src/mount/tracking.rs
-/// 
-/// this does all the starting and stopping of tracking
-/// 
+// /src/mount/tracking.rs
+// 
+// this does all the starting and stopping of tracking
+// 
 
 use esp_idf_svc::hal::{delay::FreeRtos, task::CriticalSection};
 use hifitime::Epoch;

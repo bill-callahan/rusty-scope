@@ -48,7 +48,8 @@ pub fn handle_telescope_put(
                 .map_err(|_| "Invalid RightAscensionRate value".to_string())?;
 
             // Implement your right ascension rate update logic here
-            let factor: f32 = 0.9972695677;  // the number of UTC seconds in a sidereal second
+            //let factor = 0.9972695677;  // the number of UTC seconds in a sidereal second
+            let factor: f32 = 0.9972696;  // the number of UTC seconds in a sidereal second
             let ra_rate = rightascensionrate * factor;
             data.ra_rate = ra_rate;   
             //set_telescope_rightascensionrate(rightascensionrate);
@@ -173,6 +174,26 @@ pub fn handle_telescope_put(
             // Issue the generic SlewToTarget command. The commander will pick it up.
             scope.slew_to_target().map_err(|e| e.to_string())?;
                  
+            Ok(())
+        }
+        "targetrightascension" => {
+                let ra = params.get("TargetRightAscension")
+                .ok_or("Missing RA parameter")?
+                .parse::<f64>()
+                .map_err(|_| "Invalid RA value".to_string())?;
+
+                data.target_ra = RightAscension::new_from_hours(ra);
+                drop(data);
+                Ok(())
+        }
+        "targetdeclination" => {
+            let dec = params.get("TargetDeclination")
+                .ok_or("Missing Dec parameter")?
+                .parse::<f64>()
+                .map_err(|_| "Invalid Dec value".to_string())?;
+
+            data.target_dec = Declination::new(dec);
+            drop(data);
             Ok(())
         }
         "slewtocoordinatesasync" => {

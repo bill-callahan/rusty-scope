@@ -4,12 +4,9 @@ use esp_idf_svc::hal::task::CriticalSection;
 use log::{error, info};
 use anyhow::Result;
 
-use crate::mount::{app_state::PierSide, commands::Command, RustyScope};
+//use crate::mount::{app_state::PierSide, commands::Command, RustyScope};
+use crate::mount::{commands::Command, RustyScope};
 
-/// /src/mount/moveslew.rs
-/// 
-/// this does all the starting and stopping of tracking
-/// 
 
 impl<'a> RustyScope<'a> {
     /// Starts sidereal tracking.
@@ -75,7 +72,7 @@ impl<'a> RustyScope<'a> {
     }
 
     
-    pub fn execute_slew_to_target(&self) -> Result<()> {
+    pub fn executee_slew_to_target(&self) -> Result<()> {
     info!("Executing 4-quadrant intelligent slew to target...");
 
     // --- 1. Get current state ---
@@ -173,7 +170,112 @@ impl<'a> RustyScope<'a> {
     }
     Ok(())
 }
-    
+
+pub fn execute_slew_to_target(&self) -> Result<()> {
+    info!("Executing shortest-path slew to target (Fork Mount)...");
+
+    // --- 1. Get current state ---
+    let (target_ra, target_dec, sync_offset, current_pos) = {
+        let app_state = self.app_state.lock().unwrap();
+        let _cs = CriticalSection::new();
+        let planner = unsafe { &mut *self.system.planner.0 };
+        (
+            app_state.target_ra,
+            app_state.target_dec,
+            planner.sync_steps(),
+            planner.current_position_steps(),
+        )
+    };
+    let current_lst = self.system.time.get_lst();
+
+    // --- 2. Calculate Target Hour Angle ---
+    let target_ha_hours = target_ra.to_hour_angle_hours(current_lst);
+    let target_ha_deg = target_ha_hours * 15.0;
+    let target_dec_deg = target_dec.as_degrees();
+
+    // --- 3. Current Position in Degrees ---
+    let current_logical_ra = current_pos[0] - sync_offset[0];
+    let current_logical_dec = current_pos[1] - sync_offset[1];
+    let current_ra_deg = self.ra_drivetrain.steps_to_degrees(current_logical_ra);
+    let current_dec_deg = self.dec_drivetrain.steps_to_degrees(current_logical_dec);
+
+    // --- 4. Generate Two Candidate Paths ---
+    let normalize = |deg: f64| -> f64 {
+        let mut a = deg % 360.0;
+        if a > 180.0 { a -= 360.0; }
+        if a < -180.0 { a += 360.0; }
+        a
+    };
+
+    // Determine hemisphere from the home offset
+    let home_pole = self.dec_drivetrain.home_offset_degrees; // +90 or -90
+
+    // Candidate 1: Normal (stay on this side of the pole)
+    let ra_normal = normalize(target_ha_deg);
+    let dec_normal = target_dec_deg;
+
+    // Candidate 2: Over the pole (cross to the other side)
+    let ra_over = normalize(target_ha_deg + 180.0);
+    let dec_over = if home_pole < 0.0 {
+        // Southern hemisphere: pole at -90°, going over means Dec < -90°
+        -180.0 - target_dec_deg
+    } else {
+        // Northern hemisphere: pole at +90°, going over means Dec > +90°
+        180.0 - target_dec_deg
+    };
+
+    let candidates = [
+        ("Normal", ra_normal, dec_normal),
+        ("Over Pole", ra_over, dec_over),
+    ];
+
+    // --- 5. Calculate Angular Distance for Each Candidate ---
+    let angular_distance = |from: f64, to: f64| -> f64 {
+        let mut diff = (to - from) % 360.0;
+        if diff > 180.0 { diff -= 360.0; }
+        if diff < -180.0 { diff += 360.0; }
+        diff.abs()
+    };
+
+    let costs: Vec<_> = candidates.iter().map(|(name, ra, dec)| {
+        let d_ra = angular_distance(current_ra_deg, *ra);
+        let d_dec = (dec - current_dec_deg).abs();
+        let cost = d_ra.powi(2) + d_dec.powi(2);
+        (name, *ra, *dec, d_ra, d_dec, cost)
+    }).collect();
+
+    // --- 6. Pick the Best Path ---
+    let best = costs.iter()
+        .min_by(|a, b| a.5.partial_cmp(&b.5).unwrap())
+        .ok_or_else(|| anyhow::anyhow!("No valid slew path."))?;
+
+    let (chosen_name, chosen_ra, chosen_dec, d_ra, d_dec, _) = best;
+
+    // --- 7. Command the Planner ---
+    let final_ra_steps = self.ra_drivetrain.degrees_to_steps(*chosen_ra) + sync_offset[0];
+    let final_dec_steps = self.dec_drivetrain.degrees_to_steps(*chosen_dec) + sync_offset[1];
+    let target_position = [final_ra_steps, final_dec_steps, 0];
+
+    info!("--- Fork Mount Slew ---");
+    info!("Current: RA {:.2}°, Dec {:.2}°", current_ra_deg, current_dec_deg);
+    info!("Target Sky: RA {}, Dec {}", target_ra.as_hms_string(), target_dec.as_dms_string());
+    info!("Candidates:");
+    for (name, ra, dec, dra, ddec, cost) in &costs {
+        info!("  - {}: RA {:.2}°, Dec {:.2}° | ΔRA {:.2}°, ΔDec {:.2}° | Cost {:.2}",
+              name, ra, dec, dra, ddec, cost);
+    }
+    info!("Best: {} | ΔRA {:.2}°, ΔDec {:.2}°", chosen_name, d_ra, d_dec);
+
+    {
+        let _cs = CriticalSection::new();
+        let planner = unsafe { &mut *self.system.planner.0 };
+        if let Err(e) = planner.move_to_steps(target_position) {
+            return Err(anyhow::anyhow!(e));
+        }
+    }
+
+    Ok(())
+}
 
     /// Issues a command to start or stop moving a specific axis at a given rate.
     pub fn command_move_axis(&self, axis: u8, rate_dps: f32) -> Result<()> {

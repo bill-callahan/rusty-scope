@@ -24,7 +24,7 @@ impl AxisDrivetrain {
 
         Self {
             steps_per_rev_motor: steps_per_rev_motor as f64,
-            microstepping: microstepping as u32,
+            microstepping,
             total_gear_ratio,
             steps_per_degree,
             home_offset_degrees,
@@ -49,9 +49,9 @@ impl AxisDrivetrain {
         //const SIDEREAL_SECONDS_IN_MEAN_DAY: f64 = 86164.0905;
         let steps_per_rev_final_axis = self.steps_per_rev_motor * self.microstepping as f64 * self.total_gear_ratio;
         let steps_per_sidereal_day = steps_per_rev_final_axis;
-        let result = steps_per_sidereal_day / 86400.0;
+        //let result = steps_per_sidereal_day / 86400.0;
         //let result = steps_per_sidereal_day / (SIDEREAL_SECONDS_IN_MEAN_DAY);
-        result
+        steps_per_sidereal_day / 86400.0
     }
 
     // NEW: A method for converting a relative angle to relative steps.

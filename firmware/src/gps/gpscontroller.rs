@@ -1,7 +1,8 @@
 // src/gps/gpscontroller.rs
 use esp_idf_svc::{
     hal::{delay::FreeRtos, uart::UartDriver},
-    sys::{settimeofday, timeval, uxTaskGetStackHighWaterMark, xTaskGetCurrentTaskHandle, EspError}
+    // sys::{settimeofday, timeval, uxTaskGetStackHighWaterMark, xTaskGetCurrentTaskHandle, EspError}
+    sys::{settimeofday, timeval, EspError}
     ,
 };
 use hifitime::{Epoch, TimeScale};
@@ -14,7 +15,6 @@ use std::{
 };
 
 // This struct will hold all the data parsed from the GPS.
-// It's clean and contained.
 #[derive(Debug, Clone, Default)]
 pub struct GpsData {
     pub latitude: f64,
@@ -57,17 +57,16 @@ impl GpsController {
 
         let task_controller = Arc::clone(&controller);
         
-        // --- THIS IS THE CORRECTED, IDIOMATIC WAY TO SPAWN A THREAD/TASK ---
         let _ = thread::Builder::new()
             .name("gps_task".into())
             .stack_size(8192) // Set a reasonable stack size
             .spawn(move || {
-                let gps_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
+                //let gps_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
                 let mut loop_counter = 0;
                 // The `uart_driver` is moved into and now owned by this thread.
                 let uart = uart_driver;
 
-                // --- NEW: Configure the GPS module at startup ---
+                // --- Configure the GPS module at startup ---
                 if let Err(e) = Self::configure_module(&uart) {
                     error!("Failed to configure GPS module: {}", e);
                     // We can continue anyway, it might work with defaults.
@@ -97,8 +96,7 @@ impl GpsController {
                                         // 3. We have a complete frame.
                                         let sentence_bytes = &frame_buf[start_idx..final_end_idx];
 
-                                        // 4. --- The CRITICAL STEP ---
-                                        // Attempt to convert this validated frame to a UTF-8 string.
+                                        // 4. Attempt to convert this validated frame to a UTF-8 string.
                                         // Since NMEA is pure ASCII, this will only succeed if there are
                                         // no corrupted, non-ASCII bytes in the frame.
                                         if let Ok(sentence_str) = str::from_utf8(sentence_bytes) {
@@ -135,10 +133,10 @@ impl GpsController {
                     loop_counter += 1;
                     // Print stats every 300 iterations (e.g., every 30 seconds if loop delay is 100ms)
                     if loop_counter >= 150 {
-                        let stack_hwm = unsafe { uxTaskGetStackHighWaterMark(gps_task_handle) };
+                        //let stack_hwm = unsafe { uxTaskGetStackHighWaterMark(gps_task_handle) };
                         let factor = crate::gps::pps_sync::get_clock_correction_factor();
                         debug!("[PPS_MONITOR] Current Correction Factor: {}", factor);
-                        debug!("[SYS_MONITOR] GPS Task - Stack HWM: {} bytes", stack_hwm);
+                        //debug!("[SYS_MONITOR] GPS Task - Stack HWM: {} bytes", stack_hwm);
                         loop_counter = 0;
                     }
                     FreeRtos::delay_ms(10);
@@ -148,7 +146,7 @@ impl GpsController {
         Ok(controller)
     }
 
-    // --- Public API Methods (unchanged) ---
+    // --- Public API Methods ---
     pub fn get_data(&self) -> GpsData {
         self.data.lock().unwrap().clone()
     }
@@ -157,7 +155,6 @@ impl GpsController {
         self.data.lock().unwrap().has_fix
     }
 
-    // --- NEW PUBLIC METHOD ---
     /// Sets the ESP32's system time using the latest available UTC time from the GPS.
     ///
     /// This function will only set the time if a valid UTC epoch is available from a
@@ -268,8 +265,7 @@ impl GpsController {
         for (cmd_bytes, name, rate) in commands {
             uart.write(&cmd_bytes)?;
 
-            // --- THE FIX ---
-            // Now we check the `rate` variable directly, no more magic index!
+            // Now we check the `rate` variable directly
             if rate == RATE_ENABLE {
                 debug!("Sent command to ENABLE ${} sentences.", name);
            } else {
@@ -296,7 +292,8 @@ fn parse_nmea_sentence(sentence: &str, data: &mut GpsData) {
     
     let parts: Vec<&str> = sentence.split(',').collect();
     // Use .get() for safe access to the sentence type
-    let sentence_type = match parts.get(0) {
+    // let sentence_type = match parts.get(0) {
+    let sentence_type = match parts.first() {
         Some(s) => s,
         None => return, // Ignore empty lines
     };

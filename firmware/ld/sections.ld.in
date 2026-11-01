@@ -11,5 +11,4 @@
  * into IRAM to find the source of the "Cache disabled" panic.
  */
 KEEP(*(*planner*.o)(.text .literal .text.*))
-KEEP(*(*i2s0*.o)(.text .literal .text.*))
 KEEP(*(*sr74hc595*.o)(.text .literal .text.*))

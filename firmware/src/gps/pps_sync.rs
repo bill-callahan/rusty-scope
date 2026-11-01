@@ -34,8 +34,8 @@ static LAST_PPS_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 /// - `1.0` means the ESP32 clock is perfectly accurate.
 /// - `> 1.0` means the ESP32 clock is running slightly slow.
 /// - `< 1.0` means the ESP32 clock is running slightly fast.
+/// 
 /// We use `portable_atomic::AtomicF64` because the standard library lacks an atomic float.
-
 static RAW_CORRECTION_FACTOR: AtomicF64 = AtomicF64::new(1.0);
 static FILTERED_CORRECTION_FACTOR: AtomicF64 = AtomicF64::new(1.0);
 
@@ -97,8 +97,8 @@ pub fn init_pps_input(pin: impl gpio::Pin + InputPin + OutputPin) -> Result<(), 
 
     // Configure the pin as an input with a pull-down resistor and enable the interrupt
     // on the rising edge of the pulse.
-    let mut pps_pin = PinDriver::input(pin)?;
-    pps_pin.set_pull(Pull::Down)?;
+    let mut pps_pin = PinDriver::input(pin, Pull::Down)?;
+    //pps_pin.set_pull(Pull::Down)?;
     //pps_pin.set_interrupt_type(InterruptType::RisingEdge)?;
     pps_pin.set_interrupt_type(InterruptType::PosEdge)?;
 
@@ -107,7 +107,7 @@ pub fn init_pps_input(pin: impl gpio::Pin + InputPin + OutputPin) -> Result<(), 
     // will be valid for the lifetime of the program.
     unsafe {
         let result = gpio_isr_handler_add(
-            pps_pin.pin(),
+            pps_pin.pin().into(),
             Some(pps_isr_handler),
             core::ptr::null_mut(), // No argument is passed to the ISR
         );

@@ -74,11 +74,6 @@ impl RightAscension {
 
     /// Creates a new `RightAscension` value from motor steps.
     /// Requires an instance of `DrivetrainRA` to calculate seconds per step.
-    // pub fn new_from_motor_steps(steps: f64, drivetrain_ra: &DrivetrainRA) -> Self {
-    //     let seconds = steps / drivetrain_ra.steps_per_second;
-    //     RightAscension::new(seconds)
-    // }
-
     /// Requires an instance of `AxisDrivetrain` to calculate degrees per step.
     pub fn new_from_motor_steps(
         steps: i32, 
@@ -119,15 +114,12 @@ impl RightAscension {
     /// Returns the right ascension value as a string in the format "HH:MM:SS.SS"
     pub fn as_hms_string(&self) -> String {
         let (hours, minutes, seconds) = self.as_hms();
-        format!("{:02}:{:02}:{:05.2}", hours, minutes, seconds)
+        let ttt = format!("{:02}:{:02}:{:05.2}", hours, minutes, seconds);
+        ttt
     }
 
     /// Returns the right ascension value as motor steps.
     /// Requires an instance of `DrivetrainRA` to calculate steps per second.
-    // pub fn as_motor_steps(&self, drivetrain_ra: &DrivetrainRA) -> f64 {
-    //     self.seconds * drivetrain_ra.steps_per_second
-    // }
-
     /// Requires an instance of `AxisDrivetrain` to calculate steps per degree.
     /// Returns the required absolute motor step position for this Right Ascension
     /// at a specific Local Sidereal Time.
@@ -286,7 +278,7 @@ impl DrivetrainRA {
         println!("Steps per Sidereal Second (of time): {:.4}", result.steps_per_second);
         println!("Sidereal Tracking Rate: 1 step every {:.4} seconds ({:.2} ms)", result.frequency_per_step, result.frequency_per_step * 1000.0);
         println!("======================================================");
-        println!("");
+        //println!("");
         result
     }
 

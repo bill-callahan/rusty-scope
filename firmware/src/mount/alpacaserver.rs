@@ -110,7 +110,7 @@ pub fn config_alpacaserver(server: &mut EspHttpServer<'static>, scope: Arc<Rusty
     // A single, unified PUT handler for all configuration changes.
     // This simplifies the logic. The JavaScript will send to different URLs,
     // but they can all be handled by the same function on the backend.
-    //server.fn_handler("/management/v1/configure/*", Method::Put, handle_config_put(Arc::clone(&scope)))?;
+    server.fn_handler("/management/v1/configure/*", Method::Put, mgmt_puthandler(Arc::clone(&scope)))?;
 
     // This will handle requests like PUT /management/v1/reboot
     server.fn_handler("/management/v1/*", Method::Put, mgmt_puthandler(Arc::clone(&scope)))?;
@@ -236,7 +236,7 @@ pub enum EndpointType {
 
 // All methods that use the HTTP GET verb should include parameters as query string name-value pairs
 // pub fn api_gethandler<'s>(scope: Arc<RustyScope<'static>>) -> impl for<'a> Fn(Request<&'a mut EspHttpConnection>) -> anyhow::Result<()> + Clone + 's {
-pub fn api_gethandler<'s>(scope: Arc<RustyScope<'static>>) -> impl Fn(Request<&mut EspHttpConnection>) -> anyhow::Result<()> + 'static {
+pub fn api_gethandler(scope: Arc<RustyScope<'static>>) -> impl Fn(Request<&mut EspHttpConnection>) -> anyhow::Result<()> + 'static {
 
     move |req| {
         //println!("GET-handler Thread: {:?} on core {:?}", std::thread::current().id(), esp_idf_svc::hal::cpu::core());
@@ -396,7 +396,7 @@ fn send_error_response(
 
 
 // All methods that use the HTTP PUT verb should include name-value parameters in the body using the "application/x-www-form-urlencoded" media type. 
-pub fn api_puthandler<'s>(scope: Arc<RustyScope<'static>>) -> impl for<'a> Fn(Request<&'a mut EspHttpConnection>) -> anyhow::Result<()> + Clone + 'static {
+pub fn api_puthandler(scope: Arc<RustyScope<'static>>) -> impl for<'a> Fn(Request<&'a mut EspHttpConnection>) -> anyhow::Result<()> + Clone + 'static {
     move |mut req| {
         //println!("PUT-handler Thread: {:?} on core {:?}", std::thread::current().id(), esp_idf_svc::hal::cpu::core());
         //let alpacaput_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
@@ -503,15 +503,20 @@ pub fn api_puthandler<'s>(scope: Arc<RustyScope<'static>>) -> impl for<'a> Fn(Re
 }
 
 pub fn mgmt_puthandler(scope: Arc<RustyScope<'static>>) -> impl Fn(Request<&mut EspHttpConnection>) -> anyhow::Result<()> + Send + 'static {
-    move |req| {
+    move |mut req| {
         let uri = req.uri().to_string();
         // Strip the prefix to get the endpoint (e.g., "reboot")
         let endpoint = uri.strip_prefix("/management/").unwrap_or(&uri);
 
         info!("[API] Management PUT request for endpoint: '{}'", endpoint); // Add a log for debugging!
         
+        // Read the body of the request
+        let mut buf = [0u8; 1024];
+        let len = req.read(&mut buf)?;
+        let body = std::str::from_utf8(&buf[..len])?;
+
         // Call your logic handler
-        let result = handle_management_put(Arc::clone(&scope), endpoint);
+        let result = handle_management_put(Arc::clone(&scope), endpoint, Some(body));
 
         // Build and send a standard success/error response
         let (error_number, error_message) = match result {

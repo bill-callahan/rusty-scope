@@ -3,9 +3,7 @@
 use std::sync::atomic::{AtomicU8, Ordering};
 
 use crate::stepper::bitbang_driver::BitbangStepperDriver;
-use crate::stepper::SpiStepperDriver;
 
-use super::i2s0::I2sStepperDriver;
 use super::sr74hc595::*;
 use esp_idf_svc::sys::EspError;
 
@@ -43,9 +41,7 @@ struct Profile {
 
 #[repr(C)]
 pub struct MotionPlanner<'d> {
-    //pub driver: I2sStepperDriver<'d>,
     pub driver: BitbangStepperDriver<'d>,
-    //pub driver: SpiStepperDriver<'d>,
     pub current_pos: [i32; 3],
 
     // --- State is now stored directly in the struct ---
@@ -66,9 +62,7 @@ pub struct MotionPlanner<'d> {
 }
 
 impl<'d> MotionPlanner<'d> {
-    //pub fn new(driver: I2sStepperDriver<'d>, update_frequency_hz: u64) -> Self {
     pub fn new(driver: BitbangStepperDriver<'d>, update_frequency_hz: u64) -> Self {
-    //pub fn new(driver: SpiStepperDriver<'d>, update_frequency_hz: u64) -> Self {
         Self {
             driver,
             current_pos: [0; 3],
@@ -333,17 +327,6 @@ impl<'d> MotionPlanner<'d> {
             self.mode = PlannerMode::Idle;
             return Ok(());
         }
-        // Start with a clean slate for the base state.
-        // Get a state with ONLY the enable bit set correctly.
-        let mut new_base_state = MotorState::new().enable_motors(true);
-
-        // Now, set the directions for THIS specific move.
-        new_base_state = new_base_state.set_x_dir(rates_sps[0] >= 0.0);
-        new_base_state = new_base_state.set_y_dir(rates_sps[1] >= 0.0);
-        // Note: we are NOT setting a Z direction. It will remain 0.
-        
-        // Assign the newly constructed, clean state.
-        self.base_state = new_base_state;
 
         // --- Pre-calculation Step (Floating-Point Math is SAFE here) ---
         let pulse_rate_hz = self.update_frequency_hz as f64;
@@ -374,9 +357,14 @@ impl<'d> MotionPlanner<'d> {
         // Atomically set the new state.
         self.mode = PlannerMode::Tracking;
         
-        // Set the physical direction pins.
-        self.base_state = self.base_state.set_x_dir(rates_sps[0] >= 0.0)
-                                        .set_y_dir(rates_sps[1] >= 0.0);
+        // Set the physical direction pins. 
+        // We construct the state cleanly here, enabling motors and setting directions.
+        // Note: Z direction is intentionally omitted for standard X/Y tracking.
+        self.base_state = MotorState::new()
+            .enable_motors(true)
+            .set_x_dir(rates_sps[0] >= 0.0)
+            .set_y_dir(rates_sps[1] >= 0.0);
+
         Ok(())
     }
 
@@ -387,18 +375,6 @@ impl<'d> MotionPlanner<'d> {
         if self.is_slewing() {
             return Err("Planner is busy with a slew.");
         }
-
-        // Start with a clean slate for the base state.
-        // Get a state with ONLY the enable bit set correctly.
-        let mut new_base_state = MotorState::new().enable_motors(true);
-
-        // Now, set the directions for THIS specific move.
-        new_base_state = new_base_state.set_x_dir(rates_sps[0] >= 0.0);
-        new_base_state = new_base_state.set_y_dir(rates_sps[1] >= 0.0);
-        // Note: we are NOT setting a Z direction. It will remain 0.
-        
-        // Assign the newly constructed, clean state.
-        self.base_state = new_base_state;
 
         // --- Pre-calculation Step ---
         let pulse_rate_hz = self.update_frequency_hz as f64;
@@ -428,9 +404,13 @@ impl<'d> MotionPlanner<'d> {
         self.mode = PlannerMode::Guiding;
         
         // Set the physical direction pins.
-        self.base_state = self.base_state.set_x_dir(rates_sps[0] >= 0.0)
-                                        .set_y_dir(rates_sps[1] >= 0.0)
-                                        .set_z_dir(rates_sps[2] >= 0.0);
+        // Unlike tracking, guiding often requires Z-axis (focuser/rotator) adjustments.
+        self.base_state = MotorState::new()
+            .enable_motors(true)
+            .set_x_dir(rates_sps[0] >= 0.0)
+            .set_y_dir(rates_sps[1] >= 0.0)
+            .set_z_dir(rates_sps[2] >= 0.0);
+
         Ok(())
     }
 

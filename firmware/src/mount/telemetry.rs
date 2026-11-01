@@ -1,7 +1,7 @@
-/// /src/mount/telemetry.rs
-/// 
-/// this does all the calculating and updating of the coordinates.
-/// 
+// /src/mount/telemetry.rs
+// 
+// this does all the calculating and updating of the coordinates.
+// 
 
 use esp_idf_svc::hal::task::CriticalSection;
 use log::info;
@@ -63,7 +63,7 @@ impl<'a> RustyScope<'a> {
         }
 
         // Do all the calculations....
-        let (ra, dec) = Self::get_radec(&self, planner_state, current_lst, side_of_pier);
+        let (ra, dec) = Self::get_radec(self, planner_state, current_lst, side_of_pier);
         let (alt, az) = Self::equatorial_to_horizontal(&ra, &dec, current_lst, site_info.latitude.as_degrees());
 
         // update that app_state data fields

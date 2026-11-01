@@ -94,11 +94,12 @@ impl Declination {
     pub fn normalize_clamp(&self) -> Self {
             let mut degrees = self.degrees;
             // Clamp only if exactly ±90° or beyond
-            if degrees > 90.0 {
-                degrees = 90.0;
-            } else if degrees < -90.0 {
-                degrees = -90.0;
-            }
+            //if degrees > 90.0 {
+            //    degrees = 90.0;
+            //} else if degrees < -90.0 {
+            //    degrees = -90.0;
+            //}
+            degrees = degrees.clamp(-90.0, 90.0);
         Declination { degrees }
     }
 
@@ -111,7 +112,8 @@ impl Declination {
 
         // Ensure value is between -180 and +180 first for consistent wrapping behavior
         // value = value.rem_euclid(360.0);
-        value = value % 360.0;
+        //value = value % 360.0;
+        value %= 360.0;
         if value > 180.0 {
             value -= 360.0;
         } else if value <= -180.0 {

@@ -1,4 +1,5 @@
 // src/mount/mod.rs
+#![allow(dead_code)]
 
 mod altaz;
 mod latlon;
@@ -24,6 +25,6 @@ pub use declination::Declination;
 pub use altaz::{Altitude, Azimuth};
 pub use latlon::{Latitude, Longitude};
 pub use rustyscope::{RustyScope, commander_task_entry};
-pub use app_state::{SharedAppState, RustyScopeState};
+pub use app_state::{RustyScopeState};
 
 

@@ -74,7 +74,7 @@ pub fn handle_management_get(scope: Arc<RustyScope<'static>>, endpoint: &str) ->
             match scope.get_persistent_config() {
                 Ok(config) => {
                     // Convert the DeviceConfig struct into a generic serde_json::Value
-                    let json_val = serde_json::to_value(&config).unwrap_or(JsonValue::Null);
+                    let json_val = serde_json::to_value(config).unwrap_or(JsonValue::Null);
                     // Then convert the serde_json::Value into our ApiValue
                     ApiValue::from(json_val)
                 }

@@ -2,91 +2,296 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Telescope Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustyScope - Telescope Setup</title>
+    <!-- Use the exact same CSS as msetup.html for a consistent look -->
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg-color: #ffffff;
+            --border-color: #e0e0e0;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
         body {
-            font-family: Arial, sans-serif;
-            margin: 2em;
-            max-width: 600px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
         }
-        h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 0.3em;
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 0 1em;
         }
-        label {
-            display: block;
-            margin-top: 1.2em;
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1.5em;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #34495e;
+            padding: 0.5em;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5em 1em;
+            margin: 0 0.5em;
+            border-radius: 4px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        nav a.active, nav a:hover {
+            background-color: var(--primary-color);
+        }
+        .card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            padding: 2em;
+            margin-bottom: 2em;
+        }
+        .card h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 1.5em; /* Space between columns and rows */
+        }
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+        }
+        .form-grid label {
             font-weight: bold;
+            color: var(--secondary-color);
         }
-        input[type="number"],
-        input[type="range"],
-        select {
+        .form-grid input, .form-grid select {
             width: 100%;
-            padding: 0.4em;
-            margin-top: 0.3em;
+            padding: 0.6em;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
             box-sizing: border-box;
         }
+        .form-checkbox {
+             width: auto; /* Checkboxes shouldn't be full width */
+        }
+        hr {
+            margin: 2em 0;
+            border: 0;
+            border-top: 1px solid var(--border-color);
+        }
         button {
-            margin-top: 2em;
-            padding: 0.7em 1.5em;
-            background-color: #3498db;
-            color: white;
-            border: none;
+            padding: 0.8em 1.5em;
             font-size: 1em;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
         button:hover {
             background-color: #2980b9;
         }
-        .footer {
-            margin-top: 3em;
-            font-size: 0.9em;
-            color: #777;
+        #status-message {
+            margin-top: 1em;
+            padding: 1em;
+            border-radius: 4px;
+            display: none; /* Hidden by default */
+        }
+        #status-message.success {
+            background-color: #eafaf1;
+            color: #28a745;
+            border: 1px solid #a3e9a4;
+        }
+        #status-message.error {
+            background-color: #fbeae5;
+            color: #d9534f;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 <body>
-    <h1>RustyScope Telescope Setup</h1>
 
-    <form action="/telescope/0/configure" method="POST">
-        <label for="steps_per_degree">Motor Steps Per Degree
-            <input type="number" id="steps_per_degree" name="steps_per_degree" value="512" min="1" step="1">
-        </label>
+    <div class="container">
+        <header>
+            <h1>Telescope Configuration</h1>
+        </header>
 
-        <label for="tracking_rate">Tracking Rate
-            <select id="tracking_rate" name="tracking_rate">
-                <option value="sidereal">Sidereal</option>
-                <option value="solar">Solar</option>
-                <option value="lunar">Lunar</option>
-                <option value="custom">Custom</option>
-            </select>
-        </label>
+        <nav>
+            <a href="/setup">Management</a>
+            <a href="/setup/v1/telescope/0/setup" class="active">Telescope</a>
+            <a href="/setup/v1/focuser/0/setup">Focuser</a>
+        </nav>
 
-        <label for="mount_type">Mount Type
-            <select id="mount_type" name="mount_type">
-                <option value="equatorial">Equatorial</option>
-                <option value="altaz">Alt-Azimuth</option>
-                <option value="dobsonian">Dobsonian</option>
-            </select>
-        </label>
+        <div class="card">
+            <form id="telescope-form">
+                <div class="form-grid">
+                    <!-- Left Column -->
+                    <div class="form-section">
+                        <h2>Right Ascension Drive</h2>
+                        <label for="motorx_spr">Motor Steps/Rev</label>
+                        <input type="number" id="motorx_spr" name="motorx_spr" required min="1">
+                        
+                        <label for="motorx_microsteps">Microstepping</label>
+                        <select id="motorx_microsteps" name="motorx_microsteps">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="8">8</option>
+                            <option value="16">16</option>
+                            <option value="32">32</option>
+                            <option value="64">64</option>
+                            <option value="128">128</option>
+                            <option value="256">256</option>
+                        </select>
 
-        <label>
-            Enable Limit Switches
-            <input type="checkbox" name="enable_limits">
-        </label>
+                        <label for="motorx_gratio">Gear Ratio</label>
+                        <input type="number" id="motorx_gratio" name="motorx_gratio" required min="0" step="0.001">
+                    </div>
 
-        <label>
-            Use GPS for Sync
-            <input type="checkbox" name="enable_gps" checked>
-        </label>
+                    <!-- Right Column -->
+                    <div class="form-section">
+                        <h2>Declination Drive</h2>
+                        <label for="motory_spr">Motor Steps/Rev</label>
+                        <input type="number" id="motory_spr" name="motory_spr" required min="1">
+                        
+                        <label for="motory_microsteps">Microstepping</label>
+                        <select id="motory_microsteps" name="motory_microsteps">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="4">4</option>
+                            <option value="8">8</option>
+                            <option value="16">16</option>
+                            <option value="32">32</option>
+                            <option value="64">64</option>
+                            <option value="128">128</option>
+                            <option value="256">256</option>
+                        </select>
 
-        <button type="submit">Save Settings</button>
-    </form>
+                        <label for="motory_gratio">Gear Ratio</label>
+                        <input type="number" id="motory_gratio" name="motory_gratio" required min="0" step="0.001">
+                    </div>
+                </div>
 
-    <div class="footer">
-        <p><a href="/telescope/0/status">View Status</a> | <a href="/">Back to Home</a></p>
-        <p>RustyScope - an ASCOM Alpaca Telescope Server on ESP32</p>
+                <hr>
+
+                <h2>Mount Settings</h2>
+                 <div class="form-grid">
+                    <div class="form-section">
+                        <label for="mount_type">Mount Type</label>
+                        <select id="mount_type" name="mount_type">
+                            <option value="GermanEquatorial">German Equatorial</option>
+                            <option value="ForkEquatorial">Fork Equatorial</option>
+                            <option value="AltAzimuth">Alt-Azimuth</option>
+                        </select>
+                    </div>
+                    <div class="form-section">
+                        <label for="ra_reversed">Reverse RA Direction</label>
+                        <input type="checkbox" id="ra_reversed" name="ra_reversed" class="form-checkbox">
+                        
+                        <label for="dec_reversed">Reverse Dec Direction</label>
+                        <input type="checkbox" id="dec_reversed" name="dec_reversed" class="form-checkbox">
+                    </div>
+                </div>
+
+                <hr>
+                
+                <button type="submit">Save Telescope Settings</button>
+                <div id="status-message"></div>
+            </form>
+        </div>
     </div>
+
+    <script>
+        // Helper function to show status messages
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = isError ? 'error' : 'success';
+            statusDiv.style.display = 'block';
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('telescope-form');
+            
+            // --- 1. Fetch current config and populate the form ---
+            fetch('/management/v1/config')
+                .then(response => response.json())
+                .then(data => {
+                    const config = data.Value;
+                    // RA Drive
+                    form.elements.motorx_spr.value = config.motorx_spr;
+                    form.elements.motorx_microsteps.value = config.motorx_microsteps;
+                    form.elements.motorx_gratio.value = config.motorx_gratio;
+                    // Dec Drive
+                    form.elements.motory_spr.value = config.motory_spr;
+                    form.elements.motory_microsteps.value = config.motory_microsteps;
+                    form.elements.motory_gratio.value = config.motory_gratio;
+                    // Mount Settings
+                    form.elements.mount_type.value = config.mount_type;
+                    form.elements.ra_reversed.checked = config.ra_reversed;
+                    form.elements.dec_reversed.checked = config.dec_reversed;
+                })
+                .catch(error => showStatus('Could not load current configuration.', true));
+
+            // --- 2. Handle form submission ---
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                
+                const formData = new FormData(form);
+                const jsonData = {
+                    // RA Drive
+                    motorx_spr: parseInt(formData.get('motorx_spr')),
+                    motorx_microsteps: parseInt(formData.get('motorx_microsteps')),
+                    motorx_gratio: parseFloat(formData.get('motorx_gratio')),
+                    // Dec Drive
+                    motory_spr: parseInt(formData.get('motory_spr')),
+                    motory_microsteps: parseInt(formData.get('motory_microsteps')),
+                    motory_gratio: parseFloat(formData.get('motory_gratio')),
+                    // Mount Settings
+                    mount_type: formData.get('mount_type'),
+                    ra_reversed: formData.get('ra_reversed') === 'on',
+                    dec_reversed: formData.get('dec_reversed') === 'on',
+                };
+                
+                showStatus('Saving settings...');
+
+                // PUT the partial JSON config to the server
+                fetch('/management/v1/configure/telescope', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jsonData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ErrorNumber === 0) {
+                        showStatus(data.message || 'Settings saved successfully!');
+                    } else {
+                        showStatus(`Error: ${data.ErrorMessage}`, true);
+                    }
+                })
+                .catch(error => showStatus('Failed to save settings. Check connection.', true));
+            });
+        });
+    </script>
 </body>
 </html>

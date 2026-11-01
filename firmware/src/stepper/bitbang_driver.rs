@@ -4,21 +4,29 @@ use esp_idf_svc::hal::delay::Ets;
 use esp_idf_svc::hal::gpio::{AnyIOPin, Output, PinDriver};
 use esp_idf_svc::sys::EspError;
 
-/// A simple, software-driven ("bit-banged") driver for the 74HC595 shift register.
-/// This gives us absolute control over the timing of the data, clock, and latch signals.
+/// A software-driven ("bit-banged") driver for the 74HC595 shift register.
+/// 
+/// This driver gives us absolute, cycle-accurate control over the timing of the data, 
+/// clock, and latch signals. This is essential for generating reliable step pulses 
+/// for stepper motor drivers like the LV8729.
+/// 
+/// # Hardware Mapping
+/// * `sclk` -> SH_CP (Shift Register Clock Pin)
+/// * `mosi` -> DS (Serial Data Input)
+/// * `latch` -> ST_CP (Storage Register Clock / Latch Pin)
 pub struct BitbangStepperDriver<'d> {
-    sclk: PinDriver<'d, AnyIOPin, Output>,  // The Serial Clock (SH_CP)
-    mosi: PinDriver<'d, AnyIOPin, Output>,  // The Serial Data (DS)
-    latch: PinDriver<'d, AnyIOPin, Output>, // The Latch Clock (ST_CP)
+    sclk: PinDriver<'d, Output>,  // The Serial Clock (SH_CP)
+    mosi: PinDriver<'d, Output>,  // The Serial Data (DS)
+    latch: PinDriver<'d, Output>, // The Latch Clock (ST_CP)
 }
 
 impl<'d> BitbangStepperDriver<'d> {
+    /// Initializes the GPIO pins as outputs and sets them to a known low state.
     pub fn new(
-        sclk: impl Into<AnyIOPin>,
-        mosi: impl Into<AnyIOPin>,
-        latch: impl Into<AnyIOPin>,
+        sclk: impl Into<AnyIOPin<'static>>,
+        mosi: impl Into<AnyIOPin<'static>>,
+        latch: impl Into<AnyIOPin<'static>>,
     ) -> Result<Self, EspError> {
-        // Initialize all pins as outputs and set them to a known low state.
         let mut sclk_driver = PinDriver::output(sclk.into())?;
         let mut mosi_driver = PinDriver::output(mosi.into())?;
         let mut latch_driver = PinDriver::output(latch.into())?;
@@ -34,11 +42,16 @@ impl<'d> BitbangStepperDriver<'d> {
         })
     }
     
-    /// Sends a single byte to the shift register.
+    /// Shifts a single byte into the 74HC595 register, MSB first.
+    /// 
+    /// # Timing Note
+    /// Includes a 1µs setup delay before the clock edge to easily meet the 74HC595's 
+    /// data setup time (Tds) requirements at 3.3V. Because the ESP32 executes instructions 
+    /// so quickly, the data pin might change state only nanoseconds before the clock rises 
+    /// without this delay, causing bit-shifting errors.
     #[inline(never)]
     #[link_section = ".iram1.text"]
     fn write_byte(&mut self, byte: u8) -> Result<(), EspError> {
-        // Iterate through each of the 8 bits in the byte, from most significant to least.
         for i in (0..8).rev() {
             // 1. Set the data pin (MOSI) to the value of the current bit.
             if (byte >> i) & 1 == 1 {
@@ -47,36 +60,41 @@ impl<'d> BitbangStepperDriver<'d> {
                 self.mosi.set_low()?;
             }
 
-            // 2. Pulse the clock pin (SCLK) to shift the bit into the register.
-            self.sclk.set_high()?;
-            // A tiny delay is needed to meet the chip's timing requirements. Ets is IRAM-safe.
+            // 2. Small delay to ensure Data Setup Time (t_su) is met before clock rises.
             Ets::delay_us(1); 
+
+            // 3. Pulse the clock pin (SCLK) to shift the bit into the register.
+            self.sclk.set_high()?;
+            Ets::delay_us(1); // Ensure minimum clock high pulse width (T_w)
             self.sclk.set_low()?;
         }
         Ok(())
     }
 
-    /// This is the main function called by the planner. It sends a buffer of bytes.
-    // Corrected send_steps for our use case
-
+    /// Sends a sequence of bytes to the shift register to generate a step pulse.
+    /// 
+    /// # Arguments
+    /// * `buffer` - A slice containing the byte states to output. For a standard step pulse 
+    ///   on a single 74HC595, this is expected to be `[step_high_state, step_low_state]`.
+    ///
+    /// # Logic
+    /// To create a pulse on a single shift register, we must shift in the HIGH state and 
+    /// latch it (updating the physical outputs). Then, we shift in the LOW state and latch 
+    /// it again. This sequence creates a clean hardware pulse on the output pins.
     #[inline(never)]
     #[link_section = ".iram1.text"]
     pub fn send_steps(&mut self, buffer: &[u8]) -> Result<(), EspError> {
-        // We expect a buffer of [step_high, step_low]
-        // We will send the step_high byte first, then the step_low byte.
-        // We only latch after the final byte to ensure a clean transition.
-
-        // Send the "high" pulse byte.
-        if let Some(byte) = buffer.get(0) {
-            self.write_byte(*byte)?;
+        // 1. Send the "high" pulse byte and latch to update outputs immediately.
+        if let Some(&byte) = buffer.first() {
+            self.write_byte(byte)?;
             self.latch.set_high()?;
-            Ets::delay_us(1);
+            Ets::delay_us(1); // Ensures minimum latch pulse width
             self.latch.set_low()?;
         }
         
-        // Send the "low" pulse byte.
-        if let Some(byte) = buffer.get(1) {
-            self.write_byte(*byte)?;
+        // 2. Send the "low" pulse byte and latch to complete the step pulse.
+        if let Some(&byte) = buffer.get(1) {
+            self.write_byte(byte)?;
             self.latch.set_high()?;
             Ets::delay_us(1);
             self.latch.set_low()?;

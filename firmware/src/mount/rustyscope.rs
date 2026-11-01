@@ -1,5 +1,3 @@
-
-
 // src/mount/rustyscope.rs
 
 // use super::app_state::SharedAppState;
@@ -81,8 +79,8 @@ impl<'a> RustyScope<'a> {
             90.0
         };
         machineconfig.motory_offset = offset_degrees;
-        machineconfig.motorx_gratio = 108.0;
-        machineconfig.motory_gratio = 99.0505590666;
+        machineconfig.motorx_gratio = 99.0505590666 * (58.0/16.0); // Planetary gear (99-104/2506) * (gear output)
+        machineconfig.motory_gratio = 99.0505590666 * (54.0/16.0);
         
         let ra_drivetrain: AxisDrivetrain = AxisDrivetrain::new(
             machineconfig.motorx_spr, 

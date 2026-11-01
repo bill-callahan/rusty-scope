@@ -12,25 +12,25 @@ use esp_idf_svc::hal::sd::spi::SdSpiHostDriver;
 use esp_idf_svc::hal::sd::{SdCardConfiguration, SdCardDriver};
 use esp_idf_svc::hal::spi::config::DriverConfig;
 use esp_idf_svc::hal::spi::{Dma, SpiDriver};
-use esp_idf_svc::http::server::EspHttpServer;
+// use esp_idf_svc::http::server::EspHttpServer;
 use esp_idf_svc::hal::uart::{UartConfig, UartDriver};
 use esp_idf_svc::io::vfs::MountedFatfs;
 use esp_idf_svc::nvs::EspDefaultNvsPartition;
 use esp_idf_svc::sys::{esp_timer_create, esp_timer_create_args_t, esp_timer_handle_t, esp_timer_start_periodic};
 use esp_idf_svc::wifi::EspWifi;
 use esp_idf_svc::{eventloop::EspSystemEventLoop, hal::peripherals::Peripherals};
-use esp_idf_svc::hal::prelude::*;
+use esp_idf_svc::hal::units::Hertz;
 use log::{error, info};
 
 
 use crate::gps::pps_sync;
-use crate::stepper::{BitbangStepperDriver, I2sStepperDriver, SpiStepperDriver};
+use crate::stepper::{BitbangStepperDriver};
 use crate::{
     gps::GpsController, 
     stepper::MotionPlanner, 
     storage::StorageManager, 
     time::TimeManager, 
-    webserver::{config_webserver, create_webserver},
+    // webserver::{config_webserver, create_webserver},
     wifi::wifi_create,
 };
 
@@ -67,7 +67,7 @@ pub struct SystemServices<'d> {
     pub spiffs:  Option<StorageManager>,
     // --- Service Resources ---
     _wifi: SendWrapper<Box<EspWifi<'d>>>,
-    _webserver: Option<SendWrapper<EspHttpServer<'d>>>,
+    //_webserver: Option<SendWrapper<EspHttpServer<'d>>>,
     pub ipaddr: Ipv4Addr,
     pub mac_string: String,
 }
@@ -147,12 +147,13 @@ impl<'d> SystemServices<'d> {
             }
         };
 
+        /*  DISABLED FOR NOW - works, but "there can only be one" - Highlander movie
         // --- Webserver setup and startup ---
         // 1. Declare the server variable in the main scope, initialized to None.
         //    It needs to be mutable because we will assign to it later.
         let mut webserver = None;
     
-    /*  DISABLED FOR NOW - 
+     
         // 2. The `if let` block now assigns to the outer `server` variable.
         if let Some(_sdcard_guard) = &mounted_fatfs_opt {
             // info!("[SystemServices] SD Card found, starting web server...");
@@ -256,24 +257,11 @@ impl<'d> SystemServices<'d> {
             FreeRtos::delay_ms(500);
         }
 
-        // --- Initialize the I2S Stepper Driver ---
-        //info!("[SystemServices] Initializing I2S Stepper Driver...");
-    
-        // The maximum rate of step pulses (high then low).
-        // The I2S sample rate will be 2x this.
-        const MAX_STEP_PULSE_RATE: u32 = 50_000;
+        
         const TIMER_FREQUENCY_HZ: u64 = 5_000;
-        let i2s_sample_rate = MAX_STEP_PULSE_RATE * 2; // 2 bytes per step pulse (high, low)
+        
 
-        //let i2s_driver = I2sStepperDriver::new(
-        //    peripherals.i2s0,
-        //    pins.gpio16,
-        //    pins.gpio21,
-        //    pins.gpio17,
-        //    i2s_sample_rate.Hz(),
-        //)?;
-        //info!("[SystemServices] I2S Driver Initialized.");
-
+        
         info!("[SystemServices] Initializing Bit-Banged Stepper Driver...");
         let bitbang_driver = BitbangStepperDriver::new(
             pins.gpio16, // SCK - Serial Clock
@@ -282,40 +270,11 @@ impl<'d> SystemServices<'d> {
         )?;
         info!("[SystemServices] Bit-Banged Driver Initialized.");
 
-        //info!("[SystemServices] Initializing SPI Stepper Driver...");
-        //let stepperspi_driver = SpiStepperDriver::new(
-        //    peripherals.spi3,
-        //    pins.gpio16, // SCK - Serial Clock
-        //    pins.gpio21, // MOSI - Serial Data
-        //    pins.gpio17, // LATCH - Latch Clock
-        //    Hertz(100_000),
-        //)?;
-        //info!("[SystemServices] SPI Stepper Driver Initialized.");
-
-
         // Create the Planner instance.
         
-        //let planner = MotionPlanner::new(i2s_driver, TIMER_FREQUENCY_HZ);
         let planner = MotionPlanner::new(bitbang_driver, TIMER_FREQUENCY_HZ);
-        //let planner = MotionPlanner::new(stepperspi_driver, TIMER_FREQUENCY_HZ);
-    
-        /* // --- Create the stable, 'static pointer for the C callback ---
-        // 1. Box the Arc<Mutex<>> to get a stable address on the heap.
-        let shared_planner_box = Box::new(Arc::new(Mutex::new(planner)));
-        // 2. Get a raw pointer to the Arc inside the Box.
-        let planner_arc_ptr = &*shared_planner_box as *const Arc<Mutex<_>> as *mut core::ffi::c_void;
-        // 3. "Leak" the Box so the data lives forever.
-        mem::forget(shared_planner_box);
-    
-        // 4. Reconstitute a safe, managed Arc handle for the main task to use.
-        let shared_planner: Arc<Mutex<MotionPlanner>> = unsafe {
-            Arc::clone(&*(planner_arc_ptr as *const Arc<Mutex<_>>))
-        };
-        */
         let planner_box = Box::new(planner);
         let planner_ptr = Box::into_raw(planner_box);
-
-        
 
         // --- Setup the High-Resolution Timer ---
         println!("[SystemServices] Setting up high-resolution motion timer...");
@@ -326,7 +285,8 @@ impl<'d> SystemServices<'d> {
             //dispatch_method: esp_idf_svc::sys::esp_timer_dispatch_t_ESP_TIMER_MAX,
             //dispatch_method: esp_timer_dispatch_t::ESP_TIMER_MAX,
             dispatch_method: 1,
-            name: "motion_timer".as_ptr() as *const u8,
+            // name: "motion_timer".as_ptr() as *const u8,
+            name: "motion_timer".as_ptr(),
             skip_unhandled_events: true,
         };
 
@@ -410,15 +370,15 @@ impl<'d> SystemServices<'d> {
             Ok(Self {
                 //planner: shared_planner,
                 planner: SendWrapper(planner_ptr),
-                gps: gps,
+                gps,
                 time: time_manager,
                 // No `display` field here
                 _sdcard: mounted_fatfs_opt,
                 spiffs: storage_manager,
                 _wifi: wifi,
-                _webserver: webserver,
-                ipaddr: ipaddr,
-                mac_string: mac_string,
+                //_webserver: webserver,
+                ipaddr,
+                mac_string,
             })
         }
 
