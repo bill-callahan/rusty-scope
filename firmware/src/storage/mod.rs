@@ -1,4 +1,5 @@
 // src/storage/mod.rs
+#![allow(dead_code)]
 
 pub mod spiffs;
 //pub mod sdcard;

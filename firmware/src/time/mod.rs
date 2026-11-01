@@ -1,5 +1,5 @@
 
 
-mod time;
+mod timemgr;
 
-pub use time::TimeManager;
+pub use timemgr::TimeManager;

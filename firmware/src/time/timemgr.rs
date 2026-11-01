@@ -1,10 +1,12 @@
-// src/time/time.rs
+// src/time/timemgr.rs
 
 use std::sync::{Arc, Mutex};
 use hifitime::Epoch;
-use log::{debug, info};
+//use log::{debug, info};
+use log::{info};
 use crate::gps::GpsController; // Dependency on the GPS module
-use esp_idf_svc::{hal::delay::FreeRtos, sys::{uxTaskGetStackHighWaterMark, xTaskGetCurrentTaskHandle}};
+//use esp_idf_svc::{hal::delay::FreeRtos, sys::{uxTaskGetStackHighWaterMark, xTaskGetCurrentTaskHandle}};
+use esp_idf_svc::{hal::delay::FreeRtos};
 use std::thread;
 
 // This struct will hold all time-related state.
@@ -43,7 +45,7 @@ impl TimeManager {
             .stack_size(8 * 1024)
             .spawn(move || {
                 info!("Time management task started.");
-                let sidereal_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
+                // let sidereal_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
                 let mut loop_counter = 0;
                 // Wait until we have a valid GPS position to set the longitude
                 loop {
@@ -63,8 +65,8 @@ impl TimeManager {
                     loop_counter += 1;
                     // Print stats every 300 iterations (e.g., every 30 seconds if loop delay is 100ms)
                     if loop_counter >= 30 {
-                        let stack_hwm = unsafe { uxTaskGetStackHighWaterMark(sidereal_task_handle) };
-                        debug!("[SYS_MONITOR] Sidereal Task - Stack HWM: {} bytes", stack_hwm);
+                        // let stack_hwm = unsafe { uxTaskGetStackHighWaterMark(sidereal_task_handle) };
+                        // debug!("[SYS_MONITOR] Sidereal Task - Stack HWM: {} bytes", stack_hwm);
                         loop_counter = 0;
                     }
                     // LST changes significantly over seconds, so update frequently.
@@ -156,10 +158,11 @@ impl TimeManager {
             let milliseconds = nanoseconds / 1_000_000;
             
             // 3. Manually format the string to the exact specification.
-            format!(
+            let ttt = format!(
                 "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03}Z",
                 year, month, day, hour, minute, second, milliseconds
-            )
+            );
+            ttt
         } else {
             // Return a valid-looking but clearly "not set" time if we don't have one.
             "0001-01-01T00:00:00.000Z".to_string()

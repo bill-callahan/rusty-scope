@@ -44,10 +44,10 @@ const PASSWORD: &str = env!("WIFI_PASS");
 /// in scope for the lifetime of the application to keep the WiFi connection alive.
 /// On failure, it returns an `EspError`.
 pub fn wifi_create(
-    modem: Modem,
+    modem: Modem<'_>,
     sys_loop: EspSystemEventLoop,
     nvs: EspNvsPartition<NvsDefault>,
-) -> Result<Box<EspWifi<'static>>, EspError> {
+) -> Result<Box<EspWifi<'_>>, EspError> {
     // Create the underlying ESP-IDF WiFi driver.
     let mut esp_wifi = EspWifi::new(modem, sys_loop.clone(), Some(nvs.clone()))?;
 
