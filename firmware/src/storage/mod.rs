@@ -30,6 +30,7 @@ pub struct DeviceConfig {
     pub last_dec_steps: i32,
     pub site_longitude: f64,
     pub site_latitude: f64,
+    pub site_elevation: f64,
     pub guide_ra_rate_dps: f32,
     pub guide_dec_rate_dps: f32,
     pub default_tracking_rate: i32,

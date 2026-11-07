@@ -27,7 +27,7 @@ use portable_atomic::{AtomicF64, AtomicU64, Ordering};
 /// Stores the timestamp (in microseconds from `esp_timer_get_time()`) of the last PPS pulse.
 /// This is accessed by the ISR and must be atomic.
 static LAST_PPS_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
-
+static PPS_COUNT: portable_atomic::AtomicU64 = portable_atomic::AtomicU64::new(0);
 
 /// The calculated clock correction factor.
 /// This value is the core output of this module.
@@ -45,6 +45,7 @@ static FILTERED_CORRECTION_FACTOR: AtomicF64 = AtomicF64::new(1.0);
 /// It is designed to be extremely fast and lean, performing only essential calculations.
 #[doc(hidden)]
 extern "C" fn pps_isr_handler(_arg: *mut core::ffi::c_void) {
+    PPS_COUNT.fetch_add(1, portable_atomic::Ordering::SeqCst);
     // Get the current high-resolution timestamp from the ESP32's timer.
     // This is an `unsafe` call as it's a direct FFI to the C SDK.
     let now_us = unsafe { esp_timer_get_time() as u64 };
@@ -131,3 +132,14 @@ pub fn get_clock_correction_factor() -> f64 {
     FILTERED_CORRECTION_FACTOR.load(Ordering::SeqCst)
 }
 
+pub fn last_pps_timestamp_us() -> u64 {
+    LAST_PPS_TIMESTAMP.load(portable_atomic::Ordering::SeqCst)
+}
+
+pub fn pps_pulse_count() -> u64 {
+    PPS_COUNT.load(portable_atomic::Ordering::SeqCst)
+}
+
+pub fn clock_correction_factor() -> f64 {
+    get_clock_correction_factor()
+}

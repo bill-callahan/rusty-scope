@@ -1,6 +1,7 @@
 // src/main.rs
 
 mod gps;
+mod ntp;
 mod stepper;
 mod storage;
 mod time;
@@ -81,6 +82,16 @@ fn main() -> anyhow::Result<()> {
         );
     }
 
+    /* just some test code to verify the storage is working
+    // test the spiffs
+    {
+        let mut file = File::open("/spiffs/config.json")?;
+        info!("File {file:?} opened");
+        let mut file_content = String::new();
+        file.read_to_string(&mut file_content).expect("Read failed");
+        info!("File {file:?} read: {file_content}");
+
+    }
     // test the sdcard
     {
         let mut file = File::open("/sdcard/test.txt")?;
@@ -104,17 +115,19 @@ fn main() -> anyhow::Result<()> {
             log::info!("Entry: {:?}", entry?.file_name());
         }
     }
+    */
 
+    FreeRtos::delay_ms(2000);
     println!("System running. Happy Astro-ing!!");
     
        
         // In headless mode, the main task has very little to do. It just needs
         // to stay alive and can perform periodic system monitoring.
-        let main_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
-        let mut loop_counter = 0;
+        //let main_task_handle = unsafe { xTaskGetCurrentTaskHandle() };
+        //let mut loop_counter = 0;
         
         loop {
-            
+            /*
             // We can still have our system monitor.
             if loop_counter % 150 == 0 {
                 let free_heap = unsafe { esp_idf_svc::sys::heap_caps_get_free_size(esp_idf_svc::sys::MALLOC_CAP_DEFAULT) };
@@ -141,6 +154,7 @@ fn main() -> anyhow::Result<()> {
               );
             }
             loop_counter += 1;
+            */
             
             // We can sleep for longer in headless mode, as there's no UI to update.
             FreeRtos::delay_ms(100);

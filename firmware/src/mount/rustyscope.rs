@@ -70,6 +70,11 @@ impl<'a> RustyScope<'a> {
         };
         let device_config = Arc::new(Mutex::new(machineconfig));
 
+        // --- Site data ---
+        machineconfig.site_latitude = lat.as_degrees();
+        machineconfig.site_longitude = lon.as_degrees();
+        machineconfig.site_elevation = gps.elevation;
+
         // --- Drivetrain Configuration ---
         let offset_degrees = if lat.as_degrees() < 0.0 {
             info!("Setting origin declination to -90.0");
@@ -101,7 +106,7 @@ impl<'a> RustyScope<'a> {
         // You could print the summary here if you want
         print!("\nRA Drivetrain Summary:");
         ra_drivetrain.print_summary();
-        println!("Calibration offset: {}", machineconfig.tracking_correction_factor);
+        println!("   Calibration offset: {}", machineconfig.tracking_correction_factor);
         print!("\nDEC Drivetrain Summary:");
         dec_drivetrain.print_summary();
         print!("\nFocus Drivetrain Summary:");
@@ -139,14 +144,7 @@ impl<'a> RustyScope<'a> {
             xQueueGenericCreate(10, std::mem::size_of::<Command>() as u32, 0)
         };
         
-
-
-
-        
-
-
-
-
+  
         // lastly, save the updated `config` struct, but handle the error gracefully.
         info!("[RustyScope] Attempting to save configuration to SPIFFS...");
         match system.spiffs.as_ref().unwrap().save_config(&machineconfig) {
@@ -808,7 +806,7 @@ pub extern "C" fn commander_task_entry(arg: *mut core::ffi::c_void) {
         // Print stats every 300 iterations (e.g., every 30 seconds if loop delay is 100ms)
         if loop_counter >= 300 {
             let stack_hwm = unsafe { uxTaskGetStackHighWaterMark(commander_task_handle) };
-            log::info!("[SYS_MONITOR] Commander Task - Stack HWM: {} bytes", stack_hwm);
+            //log::info!("[SYS_MONITOR] Commander Task - Stack HWM: {} bytes", stack_hwm);
             loop_counter = 0;
         }
 

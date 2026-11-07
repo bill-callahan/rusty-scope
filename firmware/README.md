@@ -41,7 +41,7 @@ Adjust WiFi credentials, MQTT settings, and other parameters as needed.
 ```bash
 espup install --toolchain=1.93.0.0
 ```
-and make sure you source your export-esh.sh script before building.  This is Muey Importante!!
+and make sure you source your export-esp.sh script before building.  This is Muey Importante!!
 ```bash
 . ~/export-esp.sh
 ```

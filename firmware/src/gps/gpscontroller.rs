@@ -100,6 +100,7 @@ impl GpsController {
                                         // Since NMEA is pure ASCII, this will only succeed if there are
                                         // no corrupted, non-ASCII bytes in the frame.
                                         if let Ok(sentence_str) = str::from_utf8(sentence_bytes) {
+                                            //info!("GPS Sentence: {}", sentence_str.trim());
                                             // 5. If successful, parse the now-guaranteed-valid string.
                                             parse_nmea_sentence(sentence_str.trim(), &mut current_data);
                                         }
@@ -174,7 +175,7 @@ impl GpsController {
                 tv_usec: 0, // Microseconds part
             };
 
-            debug!("Attempting to set system time to: {}", epoch);
+            info!("Attempting to set system time to: {}", epoch);
             
             // The `settimeofday` function is unsafe because it's a C FFI call.
             let result = unsafe { settimeofday(&timev, std::ptr::null()) };
@@ -198,7 +199,7 @@ impl GpsController {
     /// Sends configuration commands to the GPS module.
     /// This should be called once at the start of the `gps_task`.
     fn configure_module(uart: &UartDriver) -> Result<(), EspError> {
-        debug!("Configuring u-blox GPS module to send only essential NMEA sentences...");
+        info!("Configuring u-blox GPS module to send only essential NMEA sentences...");
 
         // Helper function to build a UBX CFG-MSG command for setting an NMEA sentence's rate.
         fn build_set_nmea_rate_cmd(nmea_id: u8, rate: u8) -> [u8; 16] {
@@ -267,15 +268,15 @@ impl GpsController {
 
             // Now we check the `rate` variable directly
             if rate == RATE_ENABLE {
-                debug!("Sent command to ENABLE ${} sentences.", name);
+                info!("Sent command to ENABLE ${} sentences.", name);
            } else {
-                debug!("Sent command to DISABLE ${} sentences.", name);
+                info!("Sent command to DISABLE ${} sentences.", name);
             }
         
             FreeRtos::delay_ms(100);
         }
 
-        debug!("GPS module configuration complete.");
+        info!("GPS module configuration complete.");
         Ok(())
     }
 }
@@ -289,7 +290,6 @@ fn parse_nmea_sentence(sentence: &str, data: &mut GpsData) {
     if !sentence.starts_with('$') {
         return;
     }
-    
     let parts: Vec<&str> = sentence.split(',').collect();
     // Use .get() for safe access to the sentence type
     // let sentence_type = match parts.get(0) {

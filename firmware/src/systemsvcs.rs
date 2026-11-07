@@ -27,6 +27,7 @@ use crate::gps::pps_sync;
 use crate::stepper::{BitbangStepperDriver};
 use crate::{
     gps::GpsController, 
+    ntp::NtpServer,
     stepper::MotionPlanner, 
     storage::StorageManager, 
     time::TimeManager, 
@@ -177,7 +178,7 @@ impl<'d> SystemServices<'d> {
         let tx_pin = pins.gpio4;
         let rx_pin = pins.gpio0;
         let gpsconfig = UartConfig::new()
-            .baudrate(Hertz(9600))
+            .baudrate(Hertz(38400))
             .data_bits(esp_idf_svc::hal::uart::config::DataBits::DataBits8)
             .parity_none()
             .stop_bits(esp_idf_svc::hal::uart::config::StopBits::STOP1);
@@ -205,10 +206,9 @@ impl<'d> SystemServices<'d> {
         // The TimeManager needs the GpsController to get its position.
         info!("[SystemServices] Initializing Time Manager...");
         let time_manager = TimeManager::new(gps.clone()); // This spawns its own task.
-        info!("[SystemServices] Time Manager started.");
+        //info!("[SystemServices] Time Manager started.");
 
         // setting up the GPS time synchronization
-        println!("[SystemServices] Waiting for GPS fix to set system time...");
         let mut time_has_been_set = false;
     
         loop {
@@ -256,7 +256,11 @@ impl<'d> SystemServices<'d> {
             }
             FreeRtos::delay_ms(500);
         }
-
+        // ---------------- NTP server ----------------
+        // Shares the controller and keeps port :123 alive in background threads.
+        let _ntp = NtpServer::start(gps.clone());
+        info!("NTP server started on UDP {ipaddr}:123");
+        info!("Try testing with: $ ntpdate -q {ipaddr}");
         
         const TIMER_FREQUENCY_HZ: u64 = 5_000;
         

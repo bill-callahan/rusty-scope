@@ -1,6 +1,6 @@
 [package]
 name = "rustyscopefw"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Bill-Callahan <bill@callahansecurity.com>"]
 edition = "2021"
 resolver = "2"

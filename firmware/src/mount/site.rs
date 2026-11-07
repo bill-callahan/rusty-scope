@@ -35,7 +35,7 @@ impl Site {
         println!("|_____________________________________________________________________|");
         println!("|  Elevation: {} meters                                             |", self.elevation);
         println!("|  Timezone offset: {} hours from UTC                                 |", self.tz_offset_hours);
-        println!("|  Home: {:?} Celestial Pole                                         |", self.latitude.hemisphere());
+        println!("|  Home: {:?}ern Celestial Pole                                      |", self.latitude.hemisphere());
         println!("|_____________________________________________________________________|");
 
     }
